@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Register — Vigilant Eye</title>
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700;900&display=swap" rel="stylesheet">
+<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet">
+<style>
+  *{margin:0;padding:0;box-sizing:border-box;}
+  body{font-family:'Outfit',sans-serif;background:#020818;color:#fff;min-height:100vh;display:flex;align-items:center;justify-content:center;position:relative;overflow:hidden;padding:20px 0;}
+  .bg-grid{position:fixed;inset:0;background-image:linear-gradient(rgba(0,200,255,0.03) 1px,transparent 1px),linear-gradient(90deg,rgba(0,200,255,0.03) 1px,transparent 1px);background-size:50px 50px;pointer-events:none;}
+  .bg-glow{position:fixed;width:500px;height:500px;border-radius:50%;background:radial-gradient(circle,rgba(0,100,255,0.12) 0%,transparent 70%);top:50%;left:50%;transform:translate(-50%,-50%);pointer-events:none;}
+  .card{position:relative;z-index:10;background:rgba(255,255,255,0.03);backdrop-filter:blur(20px);border:1px solid rgba(255,255,255,0.08);border-radius:20px;padding:45px;width:450px;box-shadow:0 25px 80px rgba(0,0,0,0.5);animation:slideUp 0.6s cubic-bezier(0.4,0,0.2,1);}
+  @keyframes slideUp{from{opacity:0;transform:translateY(30px);}to{opacity:1;transform:translateY(0);}}
+  .logo{display:flex;align-items:center;gap:12px;margin-bottom:30px;justify-content:center;}
+  .logo-eye{width:46px;height:46px;border-radius:12px;background:linear-gradient(135deg,#0066ff,#00c8ff);display:flex;align-items:center;justify-content:center;font-size:22px;box-shadow:0 0 20px rgba(0,150,255,0.4);}
+  .logo-text{font-size:1.4rem;font-weight:800;background:linear-gradient(90deg,#00c8ff,#0066ff);-webkit-background-clip:text;-webkit-text-fill-color:transparent;}
+  h1{font-size:1.6rem;font-weight:700;margin-bottom:5px;text-align:center;}
+  .subtitle{color:rgba(255,255,255,0.4);font-size:0.88rem;text-align:center;margin-bottom:28px;}
+  .flash{padding:11px 15px;border-radius:10px;margin-bottom:16px;font-size:0.86rem;display:flex;align-items:center;gap:8px;}
+  .flash.danger{background:rgba(255,60,60,0.15);border:1px solid rgba(255,60,60,0.3);color:#ff8080;}
+  .flash.success{background:rgba(0,200,100,0.15);border:1px solid rgba(0,200,100,0.3);color:#80ffb0;}
+  .form-row{display:grid;grid-template-columns:1fr 1fr;gap:15px;}
+  .form-group{margin-bottom:18px;position:relative;}
+  .form-group.full-width{grid-column:1/-1;}
+  label{display:block;font-size:0.78rem;color:rgba(255,255,255,0.45);margin-bottom:7px;font-weight:600;letter-spacing:0.5px;text-transform:uppercase;}
+  .input-wrap{position:relative;}
+  .input-icon{position:absolute;left:13px;top:50%;transform:translateY(-50%);color:rgba(255,255,255,0.25);font-size:0.85rem;}
+  input{width:100%;padding:13px 13px 13px 40px;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.08);border-radius:11px;color:#fff;font-family:'Outfit',sans-serif;font-size:0.92rem;transition:all 0.25s;}
+  input:focus{outline:none;border-color:rgba(0,150,255,0.6);background:rgba(0,150,255,0.06);box-shadow:0 0 0 3px rgba(0,150,255,0.1);}
+  input::placeholder{color:rgba(255,255,255,0.18);}
+  input.error{border-color:rgba(255,60,60,0.5);}
+  input.valid{border-color:rgba(0,200,100,0.5);}
+  .toggle-pass{position:absolute;right:13px;top:50%;transform:translateY(-50%);cursor:pointer;color:rgba(255,255,255,0.25);transition:color 0.2s;font-size:0.85rem;}
+  .toggle-pass:hover{color:rgba(255,255,255,0.6);}
+  .strength-bar{height:3px;border-radius:2px;margin-top:6px;background:rgba(255,255,255,0.08);overflow:hidden;}
+  .strength-fill{height:100%;width:0%;border-radius:2px;transition:all 0.3s;}
+  .strength-text{font-size:0.72rem;margin-top:4px;color:rgba(255,255,255,0.3);}
+  .error-text{font-size:0.75rem;color:#ff6666;margin-top:5px;display:none;}
+  .btn-primary{width:100%;padding:14px;border:none;border-radius:12px;background:linear-gradient(135deg,#0052cc,#00a8ff);color:#fff;font-family:'Outfit',sans-serif;font-size:0.98rem;font-weight:700;cursor:pointer;letter-spacing:0.5px;transition:all 0.25s;margin-top:8px;}
+  .btn-primary:hover{transform:translateY(-2px);box-shadow:0 10px 30px rgba(0,120,255,0.4);}
+  .terms{font-size:0.78rem;color:rgba(255,255,255,0.3);text-align:center;margin-top:14px;line-height:1.5;}
+  .login-link{text-align:center;font-size:0.86rem;color:rgba(255,255,255,0.4);margin-top:18px;}
+  .login-link a{color:#00c8ff;text-decoration:none;font-weight:600;}
+  .login-link a:hover{text-decoration:underline;}
+  .spinner{display:inline-block;width:15px;height:15px;border:2px solid rgba(255,255,255,0.3);border-top-color:#fff;border-radius:50%;animation:spin 0.8s linear infinite;vertical-align:middle;margin-right:8px;}
+  @keyframes spin{to{transform:rotate(360deg);}}
+</style>
+</head>
+<body>
+<div class="bg-grid"></div>
+<div class="bg-glow"></div>
+
+<div class="card">
+  <div class="logo">
+    <div class="logo-eye">👁</div>
+    <span class="logo-text">VIGILANT EYE</span>
+  </div>
+  <h1>Create Account</h1>
+  <p class="subtitle">Join the surveillance network</p>
+
+  {% with messages = get_flashed_messages(with_categories=true) %}
+    {% for category, message in messages %}
+      <div class="flash {{ category }}">
+        <i class="fas fa-{% if category == 'danger' %}exclamation-circle{% else %}check-circle{% endif %}"></i>
+        {{ message }}
+      </div>
+    {% endfor %}
+  {% endwith %}
+
+  <form id="regForm" method="POST" action="/register">
+    <div class="form-group">
+      <label>Full Name</label>
+      <div class="input-wrap">
+        <i class="fas fa-user input-icon"></i>
+        <input type="text" name="name" id="name" placeholder="John Doe" required autocomplete="name">
+      </div>
+      <div class="error-text" id="nameErr"></div>
+    </div>
+    <div class="form-group">
+      <label>Email Address</label>
+      <div class="input-wrap">
+        <i class="fas fa-envelope input-icon"></i>
+        <input type="email" name="email" id="email" placeholder="john@example.com" required autocomplete="email">
+      </div>
+      <div class="error-text" id="emailErr"></div>
+    </div>
+    <div class="form-group">
+      <label>Password</label>
+      <div class="input-wrap">
+        <i class="fas fa-lock input-icon"></i>
+        <input type="password" name="password" id="password" placeholder="Min 8 characters" required autocomplete="new-password">
+        <i class="fas fa-eye toggle-pass" id="tp1"></i>
+      </div>
+      <div class="strength-bar"><div class="strength-fill" id="strengthFill"></div></div>
+      <div class="strength-text" id="strengthText"></div>
+      <div class="error-text" id="passErr"></div>
+    </div>
+    <div class="form-group">
+      <label>Confirm Password</label>
+      <div class="input-wrap">
+        <i class="fas fa-lock input-icon"></i>
+        <input type="password" name="confirm_password" id="confirm_password" placeholder="Repeat password" required autocomplete="new-password">
+        <i class="fas fa-eye toggle-pass" id="tp2"></i>
+      </div>
+      <div class="error-text" id="confirmErr"></div>
+    </div>
+    <button type="submit" class="btn-primary" id="regBtn">
+      <i class="fas fa-user-plus"></i> &nbsp;Create Account
+    </button>
+    <p class="terms">By creating an account, you agree to use this system responsibly for legitimate security purposes only.</p>
+  </form>
+
+  <div class="login-link">Already have an account? <a href="/login">Sign in</a></div>
+</div>
+
+<script>
+  // Password toggle
+  function toggleVis(inputId, iconId) {
+    document.getElementById(iconId).addEventListener("click", function() {
+      const inp = document.getElementById(inputId);
+      const vis = inp.type === "text";
+      inp.type = vis ? "password" : "text";
+      this.className = `fas fa-${vis ? "eye" : "eye-slash"} toggle-pass`;
+    });
+  }
+  toggleVis("password", "tp1");
+  toggleVis("confirm_password", "tp2");
+
+  // Password strength
+  document.getElementById("password").addEventListener("input", function() {
+    const val = this.value;
+    const fill = document.getElementById("strengthFill");
+    const text = document.getElementById("strengthText");
+    let strength = 0;
+    if (val.length >= 8) strength++;
+    if (/[A-Z]/.test(val)) strength++;
+    if (/[0-9]/.test(val)) strength++;
+    if (/[^a-zA-Z0-9]/.test(val)) strength++;
+    const colors = ["#ff4444","#ff8800","#ffcc00","#00cc66"];
+    const labels = ["Weak","Fair","Good","Strong"];
+    fill.style.width = `${strength * 25}%`;
+    fill.style.background = colors[strength - 1] || "#ff4444";
+    text.textContent = val.length > 0 ? labels[strength - 1] || "Weak" : "";
+    text.style.color = colors[strength - 1] || "#ff4444";
+  });
+
+  // Submit handler
+  document.getElementById("regForm").addEventListener("submit", function(e) {
+    const btn = document.getElementById("regBtn");
+    btn.innerHTML = '<span class="spinner"></span>Creating account...';
+    btn.disabled = true;
+  });
+</script>
+</body>
+</html>

@@ -1,0 +1,15 @@
+============================= test session starts =============================
+platform win32 -- Python 3.11.9, pytest-9.0.3, pluggy-1.6.0 -- C:\Users\abdul\AppData\Local\Programs\Python\Python311\python.exe
+cachedir: .pytest_cache
+rootdir: D:\sami\a\VIGILANT EYE
+plugins: anyio-4.13.0
+collecting ... collected 6 items
+
+test_vigilant.py::test_database_connection PASSED                        [ 16%]
+test_vigilant.py::test_database_has_data PASSED                          [ 33%]
+test_vigilant.py::test_smtp_connection PASSED                            [ 50%]
+test_dashboard.py::test_login_page_loads PASSED                          [ 66%]
+test_dashboard.py::test_login_with_correct_credentials PASSED            [ 83%]
+test_dashboard.py::test_dashboard_page_opens PASSED                      [100%]
+
+============================= 6 passed in 28.22s ==============================

@@ -1,0 +1,9 @@
+path: D:\sami\a\VIGILANT EYE\dataset
+train: images/train
+val: images/val
+
+nc: 3
+names:
+  0: person
+  1: suspicious_person
+  2: theft_action
