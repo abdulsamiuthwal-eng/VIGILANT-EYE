@@ -55,6 +55,8 @@ logger = logging.getLogger(__name__)
 # ─────────────────────────────────────────────
 app = Flask(__name__)
 app.config.from_object(Config)
+app.config['TEMPLATES_AUTO_RELOAD'] = True
+app.jinja_env.auto_reload = True
 
 socketio = SocketIO(app, cors_allowed_origins="*", async_mode="threading")
 
