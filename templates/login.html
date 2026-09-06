@@ -20,10 +20,17 @@
       box-sizing: border-box;
     }
 
+    :root {
+      --palette-glow: #E3FDFD;
+      --palette-mist: #CBF1F5;
+      --palette-aqua: #A6E3E9;
+      --palette-teal: #71C9CE;
+    }
+
     body {
       font-family: 'Outfit', sans-serif;
-      background: #020818;
-      color: #fff;
+      background: #03080e;
+      color: #E3FDFD;
       min-height: 100vh;
       display: flex;
       position: relative;
@@ -39,15 +46,15 @@
     .login-left {
       flex: 0 0 50%;
       width: 50%;
-      background: rgba(2, 8, 24, 0.97);
-      border-right: 1px solid rgba(255, 255, 255, 0.05);
+      background: rgba(3, 8, 14, 0.98);
+      border-right: 1px solid rgba(166, 227, 233, 0.12);
       display: flex;
       flex-direction: column;
       justify-content: center;
       padding: 40px 48px;
       position: relative;
       z-index: 10;
-      box-shadow: 10px 0 40px rgba(0, 0, 0, 0.5);
+      box-shadow: 15px 0 50px rgba(0, 0, 0, 0.7);
       overflow-y: auto;
     }
 
@@ -55,7 +62,7 @@
       flex: 0 0 50%;
       width: 50%;
       position: relative;
-      background: #020818;
+      background: #020509;
       display: flex;
       align-items: center;
       justify-content: center;
@@ -71,22 +78,22 @@
       display: block;
     }
 
-    /* Keep original theme background grid and glow for cohesiveness */
+    /* Ambient cyber grid with calibrated ice-cyan */
     .bg-grid {
       position: absolute;
       inset: 0;
-      background-image: linear-gradient(rgba(0, 200, 255, 0.03) 1px, transparent 1px),
-        linear-gradient(90deg, rgba(0, 200, 255, 0.03) 1px, transparent 1px);
+      background-image: linear-gradient(rgba(166, 227, 233, 0.035) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(166, 227, 233, 0.035) 1px, transparent 1px);
       background-size: 50px 50px;
       pointer-events: none;
     }
 
     .bg-glow {
       position: absolute;
-      width: 400px;
-      height: 400px;
+      width: 450px;
+      height: 450px;
       border-radius: 50%;
-      background: radial-gradient(circle, rgba(0, 100, 255, 0.1) 0%, transparent 70%);
+      background: radial-gradient(circle, rgba(113, 201, 206, 0.16) 0%, rgba(166, 227, 233, 0.06) 45%, transparent 70%);
       top: 50%;
       left: 50%;
       transform: translate(-50%, -50%);
@@ -96,13 +103,13 @@
     .card {
       position: relative;
       z-index: 10;
-      background: rgba(255, 255, 255, 0.02);
-      backdrop-filter: blur(20px);
-      border: 1px solid rgba(255, 255, 255, 0.06);
-      border-radius: 20px;
-      padding: 40px 35px;
+      background: rgba(6, 15, 24, 0.72);
+      backdrop-filter: blur(28px);
+      border: 1px solid rgba(166, 227, 233, 0.16);
+      border-radius: 22px;
+      padding: 42px 38px;
       width: 100%;
-      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.4);
+      box-shadow: 0 25px 70px rgba(0, 0, 0, 0.6), 0 0 40px rgba(113, 201, 206, 0.08);
       animation: slideUp 0.6s cubic-bezier(0.4, 0, 0.2, 1);
     }
 
@@ -120,49 +127,53 @@
     .logo {
       display: flex;
       align-items: center;
-      gap: 12px;
+      gap: 14px;
       margin-bottom: 25px;
       justify-content: center;
     }
 
     .logo-eye {
-      width: 46px;
-      height: 46px;
-      border-radius: 12px;
-      background: linear-gradient(135deg, #0066ff, #00c8ff);
+      width: 48px;
+      height: 48px;
+      border-radius: 14px;
+      background: linear-gradient(135deg, #71C9CE 0%, #A6E3E9 100%);
       display: flex;
       align-items: center;
       justify-content: center;
-      font-size: 22px;
-      box-shadow: 0 0 20px rgba(0, 150, 255, 0.4);
+      font-size: 24px;
+      color: #03080e;
+      box-shadow: 0 0 25px rgba(113, 201, 206, 0.55), 0 0 10px rgba(166, 227, 233, 0.35);
     }
 
     .logo-text {
-      font-size: 1.4rem;
-      font-weight: 800;
-      background: linear-gradient(90deg, #00c8ff, #0066ff);
+      font-size: 1.45rem;
+      font-weight: 900;
+      letter-spacing: 1.5px;
+      background: linear-gradient(90deg, #E3FDFD 0%, #A6E3E9 50%, #71C9CE 100%);
       -webkit-background-clip: text;
       -webkit-text-fill-color: transparent;
     }
 
     h1 {
-      font-size: 1.5rem;
-      font-weight: 700;
+      font-size: 1.55rem;
+      font-weight: 800;
       margin-bottom: 6px;
       text-align: center;
+      color: #E3FDFD;
+      letter-spacing: -0.5px;
     }
 
     .subtitle {
-      color: rgba(255, 255, 255, 0.4);
-      font-size: 0.85rem;
+      color: rgba(203, 241, 245, 0.65);
+      font-size: 0.86rem;
       text-align: center;
-      margin-bottom: 30px;
+      margin-bottom: 28px;
     }
 
     /* Flash messages */
     .flash {
       padding: 12px 16px;
-      border-radius: 10px;
+      border-radius: 12px;
       margin-bottom: 20px;
       font-size: 0.85rem;
       display: flex;
@@ -171,36 +182,36 @@
     }
 
     .flash.danger {
-      background: rgba(255, 60, 60, 0.12);
-      border: 1px solid rgba(255, 60, 60, 0.25);
-      color: #ff8080;
+      background: rgba(255, 77, 109, 0.14);
+      border: 1px solid rgba(255, 77, 109, 0.3);
+      color: #ff99ab;
     }
 
     .flash.success {
-      background: rgba(0, 200, 100, 0.12);
-      border: 1px solid rgba(0, 200, 100, 0.25);
-      color: #80ffb0;
+      background: rgba(46, 196, 182, 0.15);
+      border: 1px solid rgba(46, 196, 182, 0.35);
+      color: #CBF1F5;
     }
 
     .flash.warning {
-      background: rgba(255, 160, 0, 0.12);
-      border: 1px solid rgba(255, 160, 0, 0.25);
-      color: #ffcc80;
+      background: rgba(255, 159, 28, 0.14);
+      border: 1px solid rgba(255, 159, 28, 0.3);
+      color: #ffe6a7;
     }
 
     /* Form */
     .form-group {
-      margin-bottom: 18px;
+      margin-bottom: 20px;
       position: relative;
     }
 
     label {
       display: block;
-      font-size: 0.78rem;
-      color: rgba(255, 255, 255, 0.5);
+      font-size: 0.76rem;
+      color: rgba(203, 241, 245, 0.75);
       margin-bottom: 7px;
-      font-weight: 600;
-      letter-spacing: 0.5px;
+      font-weight: 700;
+      letter-spacing: 0.8px;
       text-transform: uppercase;
     }
 
@@ -213,31 +224,37 @@
       left: 14px;
       top: 50%;
       transform: translateY(-50%);
-      color: rgba(255, 255, 255, 0.25);
-      font-size: 0.85rem;
+      color: rgba(166, 227, 233, 0.45);
+      font-size: 0.9rem;
+      transition: color 0.25s;
     }
 
     input {
       width: 100%;
-      padding: 13px 13px 13px 40px;
-      background: rgba(255, 255, 255, 0.04);
-      border: 1px solid rgba(255, 255, 255, 0.08);
+      padding: 13px 13px 13px 42px;
+      background: rgba(203, 241, 245, 0.035);
+      border: 1px solid rgba(166, 227, 233, 0.16);
       border-radius: 12px;
-      color: #fff;
+      color: #E3FDFD;
       font-family: 'Outfit', sans-serif;
-      font-size: 0.9rem;
+      font-size: 0.92rem;
       transition: all 0.25s;
     }
 
     input:focus {
       outline: none;
-      border-color: rgba(0, 150, 255, 0.6);
-      background: rgba(0, 150, 255, 0.06);
-      box-shadow: 0 0 0 3px rgba(0, 150, 255, 0.1);
+      border-color: #71C9CE;
+      background: rgba(113, 201, 206, 0.08);
+      box-shadow: 0 0 0 3px rgba(113, 201, 206, 0.22), 0 0 20px rgba(166, 227, 233, 0.15);
+    }
+
+    input:focus + .input-icon,
+    .input-wrap:focus-within .input-icon {
+      color: #71C9CE;
     }
 
     input::placeholder {
-      color: rgba(255, 255, 255, 0.2);
+      color: rgba(203, 241, 245, 0.25);
     }
 
     .toggle-pass {
@@ -246,45 +263,47 @@
       top: 50%;
       transform: translateY(-50%);
       cursor: pointer;
-      color: rgba(255, 255, 255, 0.25);
+      color: rgba(166, 227, 233, 0.4);
       transition: color 0.2s;
     }
 
     .toggle-pass:hover {
-      color: rgba(255, 255, 255, 0.6);
+      color: #E3FDFD;
     }
 
     .remember-row {
       display: flex;
       justify-content: space-between;
       align-items: center;
-      margin-bottom: 20px;
+      margin-bottom: 22px;
     }
 
     .checkbox-label {
       display: flex;
       align-items: center;
       gap: 8px;
-      font-size: 0.8rem;
-      color: rgba(255, 255, 255, 0.5);
+      font-size: 0.82rem;
+      color: rgba(203, 241, 245, 0.7);
       cursor: pointer;
     }
 
     .checkbox-label input[type=checkbox] {
       width: auto;
       padding: 0;
-      accent-color: #0066ff;
+      accent-color: #71C9CE;
     }
 
     .forgot-link {
-      font-size: 0.8rem;
-      color: #00c8ff;
+      font-size: 0.82rem;
+      color: #A6E3E9;
       text-decoration: none;
-      transition: opacity 0.2s;
+      font-weight: 600;
+      transition: all 0.2s;
     }
 
     .forgot-link:hover {
-      opacity: 0.7;
+      color: #E3FDFD;
+      text-shadow: 0 0 10px rgba(166, 227, 233, 0.5);
     }
 
     .btn-primary {
@@ -292,21 +311,23 @@
       padding: 14px;
       border: none;
       border-radius: 12px;
-      background: linear-gradient(135deg, #0052cc, #00a8ff);
-      color: #fff;
+      background: linear-gradient(135deg, #71C9CE 0%, #4ea8ae 100%);
+      color: #030a0f;
       font-family: 'Outfit', sans-serif;
-      font-size: 0.95rem;
-      font-weight: 700;
-      cursor: pointer;
+      font-size: 0.98rem;
+      font-weight: 800;
       letter-spacing: 0.5px;
+      cursor: pointer;
       transition: all 0.25s;
       position: relative;
       overflow: hidden;
+      box-shadow: 0 8px 25px rgba(113, 201, 206, 0.4);
     }
 
     .btn-primary:hover {
       transform: translateY(-2px);
-      box-shadow: 0 10px 25px rgba(0, 120, 255, 0.35);
+      box-shadow: 0 12px 30px rgba(113, 201, 206, 0.55), 0 0 20px rgba(166, 227, 233, 0.4);
+      background: linear-gradient(135deg, #A6E3E9 0%, #71C9CE 100%);
     }
 
     .btn-primary:active {
@@ -315,16 +336,18 @@
 
     .btn-primary.loading {
       pointer-events: none;
-      opacity: 0.7;
+      opacity: 0.75;
     }
 
     .divider {
       display: flex;
       align-items: center;
       gap: 12px;
-      margin: 20px 0;
-      color: rgba(255, 255, 255, 0.18);
-      font-size: 0.75rem;
+      margin: 22px 0;
+      color: rgba(203, 241, 245, 0.3);
+      font-size: 0.76rem;
+      letter-spacing: 1px;
+      text-transform: uppercase;
     }
 
     .divider::before,
@@ -332,31 +355,33 @@
       content: '';
       flex: 1;
       height: 1px;
-      background: rgba(255, 255, 255, 0.08);
+      background: rgba(166, 227, 233, 0.12);
     }
 
     .register-link {
       text-align: center;
-      font-size: 0.82rem;
-      color: rgba(255, 255, 255, 0.4);
+      font-size: 0.84rem;
+      color: rgba(203, 241, 245, 0.55);
     }
 
     .register-link a {
-      color: #00c8ff;
+      color: #71C9CE;
       text-decoration: none;
-      font-weight: 600;
+      font-weight: 700;
+      transition: all 0.2s;
     }
 
     .register-link a:hover {
-      text-decoration: underline;
+      color: #E3FDFD;
+      text-shadow: 0 0 10px rgba(166, 227, 233, 0.5);
     }
 
     .spinner {
       display: inline-block;
       width: 16px;
       height: 16px;
-      border: 2px solid rgba(255, 255, 255, 0.3);
-      border-top-color: #fff;
+      border: 2px solid rgba(3, 10, 15, 0.3);
+      border-top-color: #030a0f;
       border-radius: 50%;
       animation: spin 0.8s linear infinite;
       vertical-align: middle;
@@ -672,14 +697,14 @@
     function renderLoop() {
       // Clear with dark futuristic surveillance gradient background
       const grad = ctx.createRadialGradient(width/2, height/2, 50, width/2, height/2, Math.max(width, height));
-      grad.addColorStop(0, "#081026");
-      grad.addColorStop(0.5, "#030818");
-      grad.addColorStop(1, "#01040d");
+      grad.addColorStop(0, "#081622");
+      grad.addColorStop(0.5, "#040b12");
+      grad.addColorStop(1, "#010408");
       ctx.fillStyle = grad;
       ctx.fillRect(0, 0, width, height);
 
-      // Draw cyber grid background inside animation pane
-      ctx.strokeStyle = "rgba(0, 200, 255, 0.025)";
+      // Draw cyber grid background inside animation pane with ice-cyan
+      ctx.strokeStyle = "rgba(166, 227, 233, 0.035)";
       ctx.lineWidth = 1;
       const gridSize = 40;
       for (let x = 0; x < width; x += gridSize) {
@@ -710,18 +735,18 @@
         modeTimer = 0;
       }
 
-      // Define scan beam colors based on mode
-      let themeColor = "rgba(255, 255, 255, 0.15)";
-      let strokeColor = "rgba(255, 255, 255, 0.6)";
-      let beamColorGradientStart = "rgba(255, 255, 255, 0.18)";
+      // Define scan beam colors based on mode (using Ice Cyan palette)
+      let themeColor = "rgba(227, 253, 253, 0.18)";
+      let strokeColor = "rgba(166, 227, 233, 0.85)";
+      let beamColorGradientStart = "rgba(113, 201, 206, 0.28)";
       if (activeMode === "scan") {
-        themeColor = "rgba(0, 255, 120, 0.18)";
-        strokeColor = "rgba(0, 255, 120, 0.7)";
-        beamColorGradientStart = "rgba(0, 255, 120, 0.22)";
+        themeColor = "rgba(113, 201, 206, 0.25)";
+        strokeColor = "rgba(166, 227, 233, 0.95)";
+        beamColorGradientStart = "rgba(113, 201, 206, 0.38)";
       } else if (activeMode === "lock") {
-        themeColor = "rgba(255, 40, 40, 0.25)";
-        strokeColor = "rgba(255, 40, 40, 0.85)";
-        beamColorGradientStart = "rgba(255, 40, 40, 0.32)";
+        themeColor = "rgba(255, 77, 109, 0.25)";
+        strokeColor = "rgba(255, 77, 109, 0.85)";
+        beamColorGradientStart = "rgba(255, 77, 109, 0.32)";
       }
 
       // Smooth float movement coordinates
@@ -730,12 +755,10 @@
 
       // Animate tracking target in 3D space
       if (activeMode === "lock") {
-        // Track target locked position with slight panic shake
         trackingTarget.x = Math.sin(time * 0.0006) * 120 + Math.sin(time * 0.02) * 2;
         trackingTarget.y = Math.cos(time * 0.0005) * 50 + Math.sin(time * 0.02) * 2;
         trackingTarget.z = 210 + Math.sin(time * 0.002) * 10;
       } else {
-        // Normal wide scanning path
         trackingTarget.x = Math.sin(time * 0.0005) * 160;
         trackingTarget.y = Math.cos(time * 0.0003) * 80;
         trackingTarget.z = 220 + Math.sin(time * 0.0006) * 30;
@@ -759,7 +782,6 @@
       // Render Static Mounting base & fixed arm joints
       // ────────────────────────────────────────────────────────
       const projMount = cameraGeometry.mount.map(p => {
-        // Offset mount positions slightly
         return {
           x: (p.x * scale) / (p.z + dist) + width / 2,
           y: (p.y * scale) / (p.z + dist) + height / 2
@@ -771,10 +793,10 @@
       ctx.moveTo(projMount[0].x, projMount[0].y);
       for (let i = 1; i < projMount.length; i++) ctx.lineTo(projMount[i].x, projMount[i].y);
       ctx.closePath();
-      ctx.strokeStyle = "rgba(0, 100, 255, 0.15)";
+      ctx.strokeStyle = "rgba(113, 201, 206, 0.25)";
       ctx.lineWidth = 2;
       ctx.stroke();
-      ctx.fillStyle = "rgba(10, 30, 80, 0.2)";
+      ctx.fillStyle = "rgba(8, 22, 34, 0.35)";
       ctx.fill();
 
       // Proj Arm Joint points
@@ -789,7 +811,7 @@
       ctx.beginPath();
       ctx.moveTo(projMount[0].x + 15, projMount[0].y + 15);
       projArm.forEach(p => ctx.lineTo(p.x, p.y));
-      ctx.strokeStyle = "rgba(0, 150, 255, 0.25)";
+      ctx.strokeStyle = "rgba(113, 201, 206, 0.35)";
       ctx.lineWidth = 6;
       ctx.stroke();
 
@@ -814,8 +836,8 @@
       });
 
       // Draw Cylinder wireframe & semi-transparent faces
-      ctx.fillStyle = "rgba(10, 25, 60, 0.4)";
-      ctx.strokeStyle = "rgba(0, 150, 255, 0.4)";
+      ctx.fillStyle = "rgba(7, 20, 30, 0.5)";
+      ctx.strokeStyle = "rgba(113, 201, 206, 0.45)";
       ctx.lineWidth = 1.5;
 
       // Draw Back ring face
@@ -847,9 +869,9 @@
       ctx.moveTo(projLens[0].x, projLens[0].y);
       for (let i = 1; i < projLens.length; i++) ctx.lineTo(projLens[i].x, projLens[i].y);
       ctx.closePath();
-      ctx.strokeStyle = "rgba(0, 220, 255, 0.6)";
+      ctx.strokeStyle = "rgba(166, 227, 233, 0.85)";
       ctx.stroke();
-      ctx.fillStyle = "rgba(0, 100, 255, 0.15)";
+      ctx.fillStyle = "rgba(113, 201, 206, 0.22)";
       ctx.fill();
 
       // Draw Lens center glow core
@@ -870,8 +892,8 @@
       ctx.lineTo(projHood[2].x, projHood[2].y);
       ctx.lineTo(projHood[3].x, projHood[3].y);
       ctx.closePath();
-      ctx.strokeStyle = "rgba(0, 200, 255, 0.5)";
-      ctx.fillStyle = "rgba(5, 15, 40, 0.75)";
+      ctx.strokeStyle = "rgba(166, 227, 233, 0.55)";
+      ctx.fillStyle = "rgba(4, 14, 22, 0.8)";
       ctx.fill();
       ctx.stroke();
 
@@ -881,9 +903,9 @@
       if (ledBlinkOn) {
         ctx.beginPath();
         ctx.arc(ledPoint.x, ledPoint.y, 2.5, 0, Math.PI * 2);
-        ctx.fillStyle = "#ff2222";
+        ctx.fillStyle = "#ff3b3b";
         ctx.shadowBlur = 10;
-        ctx.shadowColor = "#ff2222";
+        ctx.shadowColor = "#ff3b3b";
         ctx.fill();
         ctx.shadowBlur = 0; // reset
       }
@@ -937,7 +959,7 @@
 
       if (activeMode === "scan") {
         // Draw cyber scanner grid inside spot
-        ctx.strokeStyle = "rgba(0, 255, 120, 0.25)";
+        ctx.strokeStyle = "rgba(166, 227, 233, 0.35)";
         ctx.lineWidth = 1;
         ctx.save();
         ctx.beginPath();
@@ -952,12 +974,12 @@
           ctx.stroke();
         }
         
-        // Scan green laser line sweep
+        // Scan laser line sweep
         const sweepY = projTarget.y - spreadR + ((time * 0.08) % (spreadR * 2));
-        ctx.strokeStyle = "rgba(0, 255, 120, 0.7)";
+        ctx.strokeStyle = "rgba(203, 241, 245, 0.85)";
         ctx.lineWidth = 2;
         ctx.shadowBlur = 8;
-        ctx.shadowColor = "#00ff78";
+        ctx.shadowColor = "#71C9CE";
         ctx.beginPath();
         ctx.moveTo(projTarget.x - spreadR, sweepY);
         ctx.lineTo(projTarget.x + spreadR, sweepY);
@@ -966,7 +988,7 @@
         ctx.restore();
       } else if (activeMode === "lock") {
         // Red Target tracking HUD graphics
-        ctx.strokeStyle = "rgba(255, 40, 40, 0.75)";
+        ctx.strokeStyle = "rgba(255, 60, 60, 0.8)";
         ctx.lineWidth = 1.5;
         
         // Outer target box
@@ -991,7 +1013,7 @@
         ctx.stroke();
 
         // Target crosshair lines
-        ctx.strokeStyle = "rgba(255, 40, 40, 0.4)";
+        ctx.strokeStyle = "rgba(255, 60, 60, 0.45)";
         ctx.beginPath();
         ctx.moveTo(projTarget.x - boxS - 10, projTarget.y);
         ctx.lineTo(projTarget.x - 8, projTarget.y);
@@ -1004,7 +1026,7 @@
         ctx.stroke();
 
         // Lock text
-        ctx.fillStyle = "#ff3333";
+        ctx.fillStyle = "#ff4d4d";
         ctx.font = "bold 9px 'Courier New',monospace";
         ctx.textAlign = "center";
         ctx.fillText("TARGET LOCKED", projTarget.x, projTarget.y - boxS - 15);
@@ -1032,28 +1054,25 @@
         if (pProj.x < 0 || pProj.x > width || pProj.y < 0 || pProj.y > height) return;
 
         // Vector math: determine if particle lies within the 3D scanning beam cone
-        // Vector pointing from camera center to particle
         const vPart = { x: p.x, y: p.y, z: p.z };
         const lenPart = Math.sqrt(vPart.x*vPart.x + vPart.y*vPart.y + vPart.z*vPart.z);
-        // Vector pointing from camera to tracking target
         const vTarg = { x: trackingTarget.x - floatX, y: trackingTarget.y - floatY, z: trackingTarget.z };
         const lenTarg = Math.sqrt(vTarg.x*vTarg.x + vTarg.y*vTarg.y + vTarg.z*vTarg.z);
 
         const dot = vPart.x * vTarg.x + vPart.y * vTarg.y + vPart.z * vTarg.z;
         const cosAngle = dot / (lenPart * lenTarg);
         
-        // Cone threshold angle: ~14 degrees (cos value ~0.97)
         const insideBeam = cosAngle > 0.97;
 
         let alpha = 0.08;
         let size = p.r * (150 / (p.z + dist));
-        let col = "rgba(255, 255, 255, ";
+        let col = "rgba(227, 253, 253, ";
 
         if (insideBeam) {
-          alpha = 0.55;
+          alpha = 0.6;
           size *= 1.8;
-          if (activeMode === "scan") col = "rgba(0, 255, 120, ";
-          else if (activeMode === "lock") col = "rgba(255, 50, 50, ";
+          if (activeMode === "scan") col = "rgba(166, 227, 233, ";
+          else if (activeMode === "lock") col = "rgba(255, 70, 70, ";
         }
 
         ctx.fillStyle = col + alpha + ")";
@@ -1065,7 +1084,7 @@
       // ────────────────────────────────────────────────────────
       // Render HUD Overlays & Cyber Readouts
       // ────────────────────────────────────────────────────────
-      ctx.strokeStyle = "rgba(0, 150, 255, 0.15)";
+      ctx.strokeStyle = "rgba(113, 201, 206, 0.25)";
       ctx.lineWidth = 1;
       
       // Render HUD corners
@@ -1082,32 +1101,32 @@
       ctx.stroke();
 
       // Top Left Text
-      ctx.fillStyle = "rgba(0, 150, 255, 0.5)";
+      ctx.fillStyle = "rgba(166, 227, 233, 0.8)";
       ctx.font = "bold 9px 'Outfit', sans-serif";
       ctx.textAlign = "left";
       ctx.fillText("VIGILANT EYE SURVEILLANCE FEED", pad + 10, pad + 15);
-      ctx.fillStyle = "rgba(255, 255, 255, 0.4)";
+      ctx.fillStyle = "rgba(203, 241, 245, 0.6)";
       ctx.fillText("FEED STATE: ACTIVE_STREAM", pad + 10, pad + 27);
       ctx.fillText("FPS: 60.0 (GPU_ACCEL)", pad + 10, pad + 39);
 
       // Top Right Text
       ctx.textAlign = "right";
-      ctx.fillStyle = "rgba(0, 150, 255, 0.5)";
+      ctx.fillStyle = "rgba(166, 227, 233, 0.8)";
       ctx.fillText("SYSTEM CORE: SECURE_ON", width - pad - 10, pad + 15);
       ctx.fillStyle = strokeColor;
       ctx.fillText(`AI_DETECTOR: ${activeMode.toUpperCase()}_MODE`, width - pad - 10, pad + 27);
-      ctx.fillStyle = "rgba(255, 255, 255, 0.4)";
+      ctx.fillStyle = "rgba(203, 241, 245, 0.6)";
       ctx.fillText("CORE PIPELINE: YOLOv8n", width - pad - 10, pad + 39);
 
       // Bottom Left Text: Azimuth & Elevation Angles
       ctx.textAlign = "left";
-      ctx.fillStyle = "rgba(0, 200, 255, 0.5)";
+      ctx.fillStyle = "rgba(166, 227, 233, 0.8)";
       ctx.fillText(`CAM_AZIMUTH:   ${currentPan > 0 ? "+" : ""}${currentPan.toFixed(1)}°`, pad + 10, height - pad - 25);
       ctx.fillText(`CAM_ELEVATION: ${currentTilt > 0 ? "+" : ""}${currentTilt.toFixed(1)}°`, pad + 10, height - pad - 13);
 
       // Bottom Right Text: Dynamic Clock
       ctx.textAlign = "right";
-      ctx.fillStyle = "rgba(255, 255, 255, 0.45)";
+      ctx.fillStyle = "rgba(203, 241, 245, 0.65)";
       const d = new Date();
       const timeString = d.toISOString().replace("T", " ").substring(0, 19);
       ctx.fillText(timeString + " UTC", width - pad - 10, height - pad - 13);
