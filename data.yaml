@@ -1,0 +1,13 @@
+train: ../train/images
+val: ../valid/images
+test: ../test/images
+
+nc: 2
+names: ['object', 'person']
+
+roboflow:
+  workspace: abdul-sami-ywwzw
+  project: vigilant_eye-v3wr0
+  version: dataset
+  license: CC BY 4.0
+  url: https://universe.roboflow.com/abdul-sami-ywwzw/vigilant_eye-v3wr0/dataset/dataset

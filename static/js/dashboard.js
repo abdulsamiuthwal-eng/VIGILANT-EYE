@@ -666,6 +666,12 @@ function applyTheme(theme) {
 function toggleExpand(element, containerId) {
   const container = document.getElementById(containerId);
   if (!container || !element) return;
+  
+  // Clear any inline styles to allow CSS stylesheet rules to apply correctly
+  container.style.maxHeight = "";
+  container.style.opacity = "";
+  container.style.overflow = "";
+
   const isOpen = container.classList.contains("open");
   
   if (isOpen) {

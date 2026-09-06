@@ -1,0 +1,855 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Dashboard — Vigilant Eye</title>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;900&display=swap"
+    rel="stylesheet">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://cdnjs.cloudflare.com" crossorigin>
+  <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+  
+  <!-- TensorFlow.js and COCO-SSD for client-side object detection -->
+  <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@tensorflow-models/coco-ssd"></script>
+  
+  <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
+
+  <!-- EmailJS Config (Hidden - Load dynamically from localStorage in JS) -->
+  <input type="hidden" id="ejs_public_key" value="">
+  <input type="hidden" id="ejs_service_id" value="">
+  <input type="hidden" id="ejs_template_id" value="">
+  <!-- Developer keyword (Mocked) -->
+  <input type="hidden" id="server_dev_keyword" value="demo_key">
+
+  <link rel="stylesheet" href="static/css/style.css">
+  <script>
+    if (!localStorage.getItem('currentUser')) {
+      window.location.href = "login.html";
+    }
+  </script>
+</head>
+
+<body>
+  <!-- Sidebar Mobile Overlay -->
+  <div class="sidebar-overlay" id="sidebarOverlay"></div>
+
+  <!-- ════════════ PAGE LOADER (prevents blank-screen flash) ════════════ -->
+  <div id="ve-page-loader" style="
+    position:fixed;inset:0;z-index:99999;
+    background:var(--bg-primary,#0d1a35);
+    display:flex;align-items:center;justify-content:center;
+    opacity:1;transition:opacity 0.35s ease;pointer-events:all;
+    will-change:opacity;
+  ">
+    <div style="display:flex;flex-direction:column;align-items:center;gap:16px;">
+      <div style="
+        width:44px;height:44px;border-radius:50%;
+        border:3px solid rgba(0,120,255,0.15);
+        border-top-color:#00c8ff;
+        animation:ve-loader-spin 0.7s linear infinite;
+        will-change:transform;
+      "></div>
+      <div style="font-size:0.75rem;color:rgba(255,255,255,0.3);letter-spacing:2px;text-transform:uppercase;font-family:'Outfit',sans-serif;">
+        Loading Dashboard...
+      </div>
+    </div>
+    <style>@keyframes ve-loader-spin{to{transform:rotate(360deg);}}</style>
+  </div>
+
+  <!-- ════════════════ SIDEBAR ════════════════ -->
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-header">
+      <div class="sidebar-logo">
+        <div class="logo-eye">👁</div>
+        <div>
+          <div class="logo-name">VIGILANT EYE</div>
+          <div class="logo-sub">Surveillance System</div>
+        </div>
+      </div>
+      <button class="sidebar-toggle" id="sidebarToggle"><i class="fas fa-bars"></i></button>
+    </div>
+
+    <nav class="sidebar-nav">
+      <div class="nav-section-label">MONITORING</div>
+      <a href="#" class="nav-item active" data-section="cameras" id="nav-cameras">
+        <i class="fas fa-video"></i><span>Live Cameras</span>
+        <span class="badge" id="activeCamBadge">0</span>
+      </a>
+      <a href="#" class="nav-item" data-section="alerts" id="nav-alerts">
+        <i class="fas fa-bell"></i><span>Alerts</span>
+        <span class="badge badge-red" id="alertBadge">0</span>
+      </a>
+      <a href="#" class="nav-item" data-section="events" id="nav-events">
+        <i class="fas fa-list-ul"></i><span>Event Logs</span>
+      </a>
+      <a href="#" class="nav-item" data-section="stats" id="nav-stats">
+        <i class="fas fa-chart-bar"></i><span>Analytics</span>
+      </a>
+      <div class="nav-section-label">MANAGEMENT</div>
+      <a href="#" class="nav-item" data-section="add-camera" id="nav-add-camera">
+        <i class="fas fa-plus-circle"></i><span>Add Camera</span>
+      </a>
+      <a href="#" class="nav-item" data-section="training" id="nav-training">
+        <i class="fas fa-brain"></i><span>AI Training</span>
+      </a>
+      <a href="#" class="nav-item" data-section="settings" id="nav-settings">
+        <i class="fas fa-cog"></i><span>Settings</span>
+      </a>
+      <!-- UI Theme Customization Section -->
+      <div class="nav-section-label" id="themeCustHeader" style="cursor: pointer; padding-right: 14px;" onclick="toggleThemeCustomization()">
+        Theme Customization <i class="fas fa-chevron-down" id="themeCustIcon"
+          style="float: right; transition: transform 0.3s; margin-top: 2px;"></i>
+      </div>
+      <div class="theme-customization-module" id="themeCustPanel" style="display: none; padding: 10px;">
+        <!-- Header & Sidebar Colors -->
+        <div style="color: rgba(255,255,255,0.7); font-size: 0.85rem; font-weight: 500; margin-bottom: 8px;">Header & Sidebar</div>
+        <div class="theme-color-grid" style="margin-bottom: 15px;">
+          <button class="theme-color-btn" style="background: #0078ff;" data-target="layout" data-color="#0078ff" title="Blue"></button>
+          <button class="theme-color-btn" style="background: #00cc66;" data-target="layout" data-color="#00cc66" title="Green"></button>
+          <button class="theme-color-btn" style="background: #ff3b3b;" data-target="layout" data-color="#ff3b3b" title="Red"></button>
+          <button class="theme-color-btn" style="background: #9d50bb;" data-target="layout" data-color="#9d50bb" title="Purple"></button>
+          <button class="theme-color-btn" style="background: #ff8800;" data-target="layout" data-color="#ff8800" title="Orange"></button>
+          <button class="theme-color-btn" style="background: #333333;" data-target="layout" data-color="#333333" title="Dark Gray"></button>
+          <button class="theme-color-btn" style="background: #008080;" data-target="layout" data-color="#008080" title="Teal"></button>
+          <button class="theme-color-btn" style="background: #000000;" data-target="layout" data-color="#000000" title="Black"></button>
+          <button class="theme-color-btn reset-theme" data-target="layout" title="Reset Default"><i class="fas fa-undo"></i></button>
+        </div>
+
+        <!-- Dashboard Theme Colors -->
+        <div style="color: rgba(255,255,255,0.7); font-size: 0.85rem; font-weight: 500; margin-bottom: 8px;">Dashboard Theme</div>
+        <div class="theme-color-grid">
+          <button class="theme-color-btn" style="background: #ffe30c;" data-target="dashboard" data-color="#0d1117" title="Deep Dark"></button>
+          <button class="theme-color-btn" style="background: #1e1e2e;" data-target="dashboard" data-color="#1e1e2e" title="Catppuccin Macchiato"></button>
+          <button class="theme-color-btn" style="background: #282a36;" data-target="dashboard" data-color="#282a36" title="Dracula"></button>
+          <button class="theme-color-btn" style="background: #111827;" data-target="dashboard" data-color="#111827" title="Tailwind Gray"></button>
+          <button class="theme-color-btn" style="background: #171923;" data-target="dashboard" data-color="#171923" title="Chakra UI Dark"></button>
+          <button class="theme-color-btn" style="background: #242424;" data-target="dashboard" data-color="#242424" title="Vue Dark"></button>
+          <button class="theme-color-btn" style="background: #1a1a1a;" data-target="dashboard" data-color="#1a1a1a" title="Vite Dark"></button>
+          <button class="theme-color-btn" style="background: #0f172a;" data-target="dashboard" data-color="#0f172a" title="Slate"></button>
+          <button class="theme-color-btn reset-theme" data-target="dashboard" title="Reset Default"><i class="fas fa-undo"></i></button>
+        </div>
+      </div>
+      
+      <script>
+        // Local UI state
+        let themeOpen = false;
+        
+        function toggleThemeCustomization() {
+          themeOpen = !themeOpen;
+          
+          const panel = document.getElementById('themeCustPanel');
+          const icon = document.getElementById('themeCustIcon');
+          
+          if (themeOpen === true) {
+            panel.style.display = 'block';
+            if (icon) icon.style.transform = 'rotate(180deg)';
+          } else {
+            panel.style.display = 'none';
+            if (icon) icon.style.transform = 'rotate(0deg)';
+          }
+        }
+      </script>
+    </nav>
+
+    <div class="sidebar-footer">
+      <div class="user-info">
+        <div class="avatar" id="sidebarAvatar">D</div>
+        <div class="user-details">
+          <div class="user-name" id="sidebarUserName">Demo User</div>
+          <div class="user-role" id="sidebarUserRole">Administrator</div>
+        </div>
+      </div>
+      <a href="javascript:void(0)" onclick="logout()" class="logout-btn" title="Logout"><i class="fas fa-sign-out-alt"></i></a>
+    </div>
+  </aside>
+
+  <!-- ════════════════ MAIN CONTENT ════════════════ -->
+  <main class="main-content" id="mainContent">
+
+    <!-- TOP BAR -->
+    <header class="topbar">
+      <div class="topbar-left" style="display: flex; align-items: center;">
+        <button class="mobile-menu-btn" id="mobileMenuBtn" title="Toggle Navigation">
+          <i class="fas fa-bars"></i>
+        </button>
+        <div>
+          <h2 class="page-title" id="pageTitle">Live Cameras</h2>
+          <div class="breadcrumb">Dashboard › <span id="breadcrumbSub">Live Cameras</span></div>
+        </div>
+      </div>
+      <div class="topbar-right">
+        <button class="btn btn-primary btn-sm" id="refreshSystemBtn" title="Refresh System Data & Feeds">
+          <i class="fas fa-sync-alt"></i> Refresh System
+        </button>
+        <div class="status-pill" id="systemStatus">
+          <span class="status-dot green"></span> System Online
+        </div>
+        <div class="time-display" id="timeDisplay"></div>
+        <button class="icon-btn" id="themeToggleBtn" title="Toggle Theme">
+          <i class="fas fa-moon" id="themeIcon"></i>
+        </button>
+        <button class="icon-btn notification-btn" id="notifBtn" title="Notifications">
+          <i class="fas fa-bell"></i>
+          <span class="notif-dot" id="notifDot" style="display:none;"></span>
+        </button>
+      </div>
+    </header>
+
+    <!-- ALERT TOAST -->
+    <div class="alert-toast-container" id="toastContainer"></div>
+
+    <!-- ══ SECTION: CAMERAS ══ -->
+    <section class="section active" id="section-cameras">
+      <div class="section-header">
+        <div class="section-title-row">
+          <h3>Live Camera Feeds</h3>
+        </div>
+      </div>
+      <div class="camera-grid" id="cameraGrid">
+        <div class="no-cameras-msg" id="noCamerasMsg">
+          <i class="fas fa-video-slash"></i>
+          <h4>No cameras configured</h4>
+          <p>Add a camera to start monitoring.</p>
+          <button class="btn btn-primary" onclick="switchSection('add-camera')">
+            <i class="fas fa-plus"></i> Add Camera
+          </button>
+        </div>
+      </div>
+
+      <!-- Expanded Camera View -->
+      <div class="camera-expanded-view" id="cameraExpandedView" style="display: none;">
+        <div class="expanded-main-col">
+          <div class="expanded-card">
+            <div class="expanded-feed-container" id="expandedFeedContainer">
+              <!-- Active stream will be injected here -->
+            </div>
+            <div class="expanded-info-bar">
+              <div class="cam-meta">
+                <h4 id="expandedCamName">Camera Name</h4>
+                <span id="expandedCamLoc">Location</span>
+              </div>
+              <div class="expanded-actions">
+                <button class="btn btn-outline" id="btnExitExpanded">
+                  <i class="fas fa-th-large"></i> Back to Grid
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="expanded-sidebar">
+          <h5>Other Cameras</h5>
+          <div class="thumb-list" id="cameraThumbList">
+            <!-- Thumbnails will be injected here -->
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ══ SECTION: ALERTS ══ -->
+    <section class="section" id="section-alerts">
+      <div class="section-header">
+        <div class="section-title-row">
+          <h3>Alert Panel</h3>
+          <div class="alert-controls">
+            <div class="global-alert-toggle">
+              <span>Global Alerts</span>
+              <label class="toggle-switch">
+                <input type="checkbox" id="globalAlertsToggle" checked>
+                <span class="toggle-slider"></span>
+              </label>
+            </div>
+            <button class="btn btn-outline" id="testAlertBtn">
+              <i class="fas fa-flask"></i> Test Alert
+            </button>
+            <button class="btn btn-outline-danger" id="clearAlertsBtn">
+              <i class="fas fa-trash"></i> Clear All
+            </button>
+          </div>
+        </div>
+        <!-- Sound controls -->
+        <div class="sound-controls card-mini">
+          <i class="fas fa-volume-up" style="color:var(--accent)"></i>
+          <span>Alert Sound:</span>
+          <label class="toggle-switch">
+            <input type="checkbox" id="soundToggle" checked>
+            <span class="toggle-slider"></span>
+          </label>
+          <input type="range" id="volumeSlider" min="0" max="100" value="80" class="volume-slider">
+          <span class="volume-val" id="volVal">80%</span>
+          <select id="toneSelect" class="tone-select">
+            <option value="beep">Beep</option>
+            <option value="alarm">Alarm</option>
+            <option value="chime">Chime</option>
+          </select>
+          <button class="btn-sm" id="testSoundBtn"><i class="fas fa-play"></i> Test</button>
+        </div>
+      </div>
+      <div class="alerts-list" id="alertsList">
+        <div class="empty-state">
+          <i class="fas fa-shield-alt"></i>
+          <p>No alerts. System monitoring actively.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- ══ SECTION: EVENTS ══ -->
+    <section class="section" id="section-events">
+      <div class="section-header">
+        <div class="section-title-row">
+          <h3>Event Logs</h3>
+          <div class="filter-row">
+            <select id="filterCamera" class="filter-select">
+              <option value="">All Cameras</option>
+            </select>
+            <select id="filterActivity" class="filter-select">
+              <option value="">All Activities</option>
+              <option>Item Taken Without Scanning</option>
+              <option>Prolonged Stay in Restricted Zone</option>
+              <option>Object Hidden in Bag/Pocket</option>
+              <option>Suspicious Movement</option>
+            </select>
+            <button class="btn btn-primary" id="applyFilterBtn"><i class="fas fa-filter"></i> Filter</button>
+            <button class="btn btn-outline" id="exportEventsBtn"><i class="fas fa-download"></i> Export</button>
+          </div>
+        </div>
+      </div>
+      <div class="table-wrap">
+        <table class="data-table" id="eventsTable">
+          <thead>
+            <tr>
+              <th>Event ID</th>
+              <th>Camera</th>
+              <th>Activity</th>
+              <th>Confidence</th>
+              <th>Severity</th>
+              <th>Time</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody id="eventsBody">
+            <tr>
+              <td colspan="7" class="loading-row">Loading events...</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="pagination-row">
+        <button class="btn btn-outline btn-sm" id="prevPageBtn">← Prev</button>
+        <span class="page-info" id="pageInfo">Page 1</span>
+        <button class="btn btn-outline btn-sm" id="nextPageBtn">Next →</button>
+      </div>
+    </section>
+
+    <!-- ══ SECTION: STATS ══ -->
+    <section class="section" id="section-stats">
+      <div class="section-header">
+        <h3>Analytics & Statistics</h3>
+      </div>
+      <div class="stats-grid">
+        <div class="stat-card">
+          <div class="stat-icon blue"><i class="fas fa-exclamation-triangle"></i></div>
+          <div class="stat-content">
+            <div class="stat-val" id="statTotal">—</div>
+            <div class="stat-label">Total Alerts</div>
+          </div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon red"><i class="fas fa-bell"></i></div>
+          <div class="stat-content">
+            <div class="stat-val" id="statToday">—</div>
+            <div class="stat-label">Today's Alerts</div>
+          </div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon green"><i class="fas fa-check-circle"></i></div>
+          <div class="stat-content">
+            <div class="stat-val" id="statAccuracy">—%</div>
+            <div class="stat-label">Detection Accuracy</div>
+          </div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon orange"><i class="fas fa-video"></i></div>
+          <div class="stat-content">
+            <div class="stat-val" id="statCameras">—</div>
+            <div class="stat-label">Active Cameras</div>
+          </div>
+        </div>
+      </div>
+      <div class="charts-grid">
+        <div class="chart-card">
+          <h4>Weekly Theft Detections</h4>
+          <div style="position: relative; height: 200px; width: 100%;">
+            <canvas id="weeklyChart"></canvas>
+          </div>
+        </div>
+        <div class="chart-card">
+          <h4>Activity Breakdown</h4>
+          <div style="position: relative; height: 200px; width: 100%;">
+            <canvas id="activityChart"></canvas>
+          </div>
+        </div>
+        <div class="chart-card wide">
+          <h4>Hourly Detection Trend</h4>
+          <div style="position: relative; height: 160px; width: 100%;">
+            <canvas id="hourlyChart"></canvas>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ══ SECTION: ADD CAMERA ══ -->
+    <section class="section" id="section-add-camera">
+      <div class="section-header">
+        <h3>Add Camera</h3>
+      </div>
+      <div class="two-col">
+        <div class="card-panel">
+          <h4><i class="fas fa-search"></i> Auto-Detect Cameras</h4>
+          <p class="hint">Scan for connected USB / webcam devices.</p>
+          <button class="btn btn-primary" id="detectCamerasBtn">
+            <i class="fas fa-search"></i> Scan for Cameras
+          </button>
+          <div id="detectedCamList" class="detected-list"></div>
+        </div>
+        <div class="card-panel">
+          <h4><i class="fas fa-plus"></i> Add Manually</h4>
+          <form id="addCameraForm">
+            <div class="form-group">
+              <label>Camera Name</label>
+              <input type="text" id="camName" placeholder="e.g. Entrance Camera" required>
+            </div>
+            <div class="form-group">
+              <label>Source / Name</label>
+              <input type="text" id="camSource" placeholder="e.g. Main Entrance" required>
+            </div>
+            <div class="form-group">
+              <label>Type</label>
+              <select id="camType" class="filter-select" style="width:100%">
+                <option value="usb">USB / Webcam</option>
+                <option value="mobile">Mobile Camera</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label>Location / Zone</label>
+              <input type="text" id="camLocation" placeholder="e.g. Aisle 3, Checkout">
+            </div>
+            <button type="submit" class="btn btn-primary" style="width:100%">
+              <i class="fas fa-plus-circle"></i> Add Camera
+            </button>
+          </form>
+        </div>
+      </div>
+      <div class="card-panel" style="margin-top:20px">
+        <h4 class="expandable-header" onclick="toggleExpand(this, 'cameraExpandable')">
+          <span><i class="fas fa-list"></i> Camera Management</span>
+          <i class="fas fa-chevron-down exp-icon"></i>
+        </h4>
+        <div id="cameraExpandable" class="expandable-panel" style="margin-top:14px">
+          <div class="table-wrap">
+            <table class="data-table" id="cameraManageTable">
+              <thead>
+                <tr>
+                  <th>ID</th>
+                  <th>Name</th>
+                  <th>Source</th>
+                  <th>Type</th>
+                  <th>Location</th>
+                  <th>Alerts</th>
+                  <th>Status</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody id="cameraManageBody"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ══ SECTION: TRAINING ══ -->
+    <section class="section" id="section-training">
+      <div class="section-header">
+        <h3>AI Model Training</h3>
+      </div>
+      <div class="two-col">
+        <div class="card-panel">
+          <h4><i class="fas fa-database"></i> Dataset Status</h4>
+          <button class="btn btn-outline" id="validateDatasetBtn">
+            <i class="fas fa-check"></i> Validate Dataset
+          </button>
+          <button class="btn btn-outline" id="prepareDatasetBtn" style="margin-left:8px">
+            <i class="fas fa-folder-plus"></i> Prepare Folders
+          </button>
+          <div id="datasetStatus" class="dataset-info"></div>
+          <div class="hint" style="margin-top:12px">
+            📁 Place labeled images in: <code>dataset/images/train/</code><br>
+            📁 Place YOLO labels in: <code>dataset/labels/train/</code>
+          </div>
+
+          <hr style="border:0; border-top:1px solid var(--border); margin: 16px 0;">
+          <h5 style="margin-bottom:8px; display:flex; align-items:center; gap:6px;">
+            <i class="fas fa-film"></i> Extract Video to Images
+          </h5>
+          <div class="form-group" style="margin-bottom:10px;">
+            <label>Extraction Rate (FPS)</label>
+            <select id="videoFpsSelect" class="filter-select" style="width:100%">
+              <option value="1">1 Frame per Second</option>
+              <option value="2">2 Frames per Second</option>
+              <option value="5">5 Frames per Second</option>
+            </select>
+          </div>
+          <input type="file" id="videoUploadInput" accept="video/mp4,video/x-m4v,video/*" style="display:none;">
+          <button class="btn btn-outline" id="uploadVideoBtn" style="width:100%; border-color:var(--accent);">
+            <i class="fas fa-upload"></i> Upload Video Dataset (Optional)
+          </button>
+          <div id="extractionProgressWrap" style="display:none; margin-top:12px;">
+            <div class="progress-bar-wrap">
+              <div class="progress-bar" id="extractionBar" style="background-color:var(--orange);"></div>
+            </div>
+            <div id="extractionMsg" class="training-msg" style="color:var(--orange);">Extracting...</div>
+          </div>
+          <div class="hint" style="color:var(--red); font-size:0.75rem; margin-top:8px;">
+            <i class="fas fa-exclamation-triangle"></i> Extracted frames are stored securely. You MUST label them (e.g.
+            using LabelImg/Roboflow) before they can be used for training.
+          </div>
+        </div>
+        <div class="card-panel">
+          <h4><i class="fas fa-cog"></i> Training Configuration</h4>
+          <div class="form-group">
+            <label>Epochs</label>
+            <input type="number" id="trainEpochs" value="50" min="10" max="500">
+          </div>
+          <div class="form-group">
+            <label>Batch Size</label>
+            <input type="number" id="trainBatch" value="16" min="4" max="64">
+          </div>
+          <!-- Developer keyword field removed from UI — auto-filled from config.py DEVELOPER_CONFIG -->
+          <div class="form-group" id="devKeywordGroup" style="display:none">
+            <input type="password" id="devKeyword" value="demo_key">
+          </div>
+          <button class="btn btn-primary" id="startTrainingBtn" style="width:100%">
+            <i class="fas fa-play"></i> Start Training
+          </button>
+          <button class="btn btn-outline-danger" id="stopTrainingBtn"
+            style="width:100%; margin-top:10px; display:none;">
+            <i class="fas fa-stop"></i> Stop Training
+          </button>
+        </div>
+      </div>
+      <div class="card-panel" style="margin-top:20px">
+        <h4><i class="fas fa-tasks"></i> Training Progress</h4>
+
+        <!-- IDLE state -->
+        <div id="trainingIdle" style="color:rgba(255,255,255,0.3);font-size:0.9rem">No training in progress.</div>
+
+        <!-- ACTIVE state — enhanced time estimator panel -->
+        <div id="trainingProgressWrap" style="display:none">
+          <div class="training-progress-enhanced">
+
+            <!-- Header row: label + % badge -->
+            <div class="progress-header-row">
+              <span class="progress-label-text"><i class="fas fa-brain"
+                  style="color:var(--accent);margin-right:6px"></i>Training in Progress</span>
+              <span class="progress-pct-badge" id="trainProgressPct">0%</span>
+            </div>
+
+            <!-- Progress bar -->
+            <div class="progress-bar-wrap">
+              <div class="progress-bar" id="trainingBar"></div>
+            </div>
+
+            <!-- Epoch row + status pill -->
+            <div class="progress-epoch-row">
+              <span class="epoch-label" id="trainEpochLabel">Epoch — / —</span>
+              <span class="training-active-pill" id="trainingStatusPill">
+                <span class="pulse-dot"></span> TRAINING
+              </span>
+            </div>
+
+            <!-- 4-card time metric grid -->
+            <div class="time-metric-grid">
+              <div class="time-metric-card">
+                <div class="metric-icon">⏱️</div>
+                <div class="metric-value" id="trainElapsedTime">—</div>
+                <div class="metric-label">Elapsed</div>
+              </div>
+              <div class="time-metric-card">
+                <div class="metric-icon">⚡</div>
+                <div class="metric-value" id="trainAvgEpochTime">—</div>
+                <div class="metric-label">Per Epoch</div>
+              </div>
+              <div class="time-metric-card">
+                <div class="metric-icon">⏳</div>
+                <div class="metric-value countdown" id="trainTimeLeft">—</div>
+                <div class="metric-label">Time Left</div>
+              </div>
+              <div class="time-metric-card">
+                <div class="metric-icon">🏁</div>
+                <div class="metric-value eta-time" id="trainCompletionTime">—</div>
+                <div class="metric-label">ETA</div>
+              </div>
+            </div>
+
+            <!-- Epoch / loss detail line -->
+            <div class="training-epoch-msg" id="trainingMsg">Initializing...</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="card-panel" style="margin-top:20px">
+        <h4 class="expandable-header" onclick="toggleExpand(this, 'historyExpandable')">
+          <span><i class="fas fa-history"></i> Training History</span>
+          <i class="fas fa-chevron-down exp-icon"></i>
+        </h4>
+        <div id="historyExpandable" class="expandable-panel" style="margin-top:14px">
+          <table class="data-table" id="trainHistTable">
+            <thead>
+              <tr>
+                <th>Session</th>
+                <th>Date</th>
+                <th>Epochs</th>
+                <th>Status</th>
+                <th>Accuracy (mAP50)</th>
+                <th>Loss</th>
+              </tr>
+            </thead>
+            <tbody id="trainHistBody">
+              <tr>
+                <td colspan="6" class="loading-row">Loading...</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <!-- ══ SECTION: SETTINGS ══ -->
+    <section class="section" id="section-settings">
+      <div class="section-header">
+        <h3>System Settings</h3>
+      </div>
+      <div class="settings-grid">
+
+        <div class="card-panel">
+          <h4><i class="fas fa-font"></i> Font Customization</h4>
+          
+          <div class="setting-group">
+            <div class="setting-row">
+              <div>
+                <div class="setting-label">Layout Font (Header & Sidebar)</div>
+                <div class="setting-desc">Font Style</div>
+              </div>
+              <select id="layoutFontFamily" class="filter-select" style="width: 140px;">
+                <option value="'Outfit', sans-serif">Outfit</option>
+                <option value="'Inter', sans-serif">Inter</option>
+                <option value="'Roboto', sans-serif">Roboto</option>
+                <option value="'Poppins', sans-serif">Poppins</option>
+              </select>
+            </div>
+            <div class="setting-row">
+              <div>
+                <div class="setting-desc">Font Size (<span id="layoutFontSizeVal">16px</span>)</div>
+              </div>
+              <input type="range" id="layoutFontSize" min="12" max="20" value="16" class="volume-slider">
+            </div>
+          </div>
+
+          <div class="setting-group" style="margin-top: 20px; border-top: 1px solid var(--border); padding-top: 15px;">
+            <div class="setting-row">
+              <div>
+                <div class="setting-label">Dashboard Font (Content)</div>
+                <div class="setting-desc">Font Style</div>
+              </div>
+              <select id="dashboardFontFamily" class="filter-select" style="width: 140px;">
+                <option value="'Outfit', sans-serif">Outfit</option>
+                <option value="'Inter', sans-serif">Inter</option>
+                <option value="'Roboto', sans-serif">Roboto</option>
+                <option value="'Poppins', sans-serif">Poppins</option>
+              </select>
+            </div>
+            <div class="setting-row">
+              <div>
+                <div class="setting-desc">Font Size (<span id="dashboardFontSizeVal">16px</span>)</div>
+              </div>
+              <input type="range" id="dashboardFontSize" min="12" max="20" value="16" class="volume-slider">
+            </div>
+          </div>
+        </div>
+
+        <!-- ════════ Multi-Email Alert System ════════ -->
+        <div class="card-panel">
+          <h4><i class="fas fa-envelope-circle-check"></i> Verified Alert Emails</h4>
+          <p class="setting-desc" style="margin-bottom:16px;">
+            Add multiple email addresses to receive security alerts. Each email must be verified via OTP.
+          </p>
+
+          <div id="addEmailSection" style="margin-bottom:18px;">
+            <div class="form-group" style="margin-bottom:10px;">
+              <label style="font-size:11px;color:rgba(255,255,255,0.45);text-transform:uppercase;letter-spacing:0.5px;">New Email Address</label>
+              <div style="display:flex;gap:8px;align-items:center;">
+                <input type="email" id="newAlertEmailInput" placeholder="recipient@example.com"
+                  style="flex:1;height:40px;font-size:0.88rem;">
+                <button class="btn btn-primary btn-sm" id="btnAddEmail" style="height:40px;padding:0 16px;white-space:nowrap;">
+                  <i class="fas fa-paper-plane"></i> Send Code
+                </button>
+              </div>
+            </div>
+
+            <div id="newEmailOtpSection" style="display:none;animation:fadeIn 0.3s ease;">
+              <div class="form-group" style="margin-bottom:10px;">
+                <label style="font-size:11px;color:rgba(255,255,255,0.45);text-transform:uppercase;letter-spacing:0.5px;">Verification Code</label>
+                <div style="display:flex;gap:8px;align-items:center;">
+                  <input type="text" id="newEmailOtpInput" placeholder="••••••" maxlength="6"
+                    style="flex:1;height:40px;letter-spacing:6px;text-align:center;font-size:1.1rem;font-weight:700;">
+                  <button class="btn btn-primary btn-sm" id="btnVerifyNewEmail"
+                    style="height:40px;padding:0 16px;white-space:nowrap;background:linear-gradient(135deg,#00b09b,#00d09e);">
+                    <i class="fas fa-check-circle"></i> Verify
+                  </button>
+                </div>
+                <div style="margin-top:6px;">
+                  <button class="btn btn-outline btn-sm" id="btnCancelOtp" style="font-size:0.75rem;padding:4px 10px;">
+                    <i class="fas fa-times"></i> Cancel
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div style="margin-top:4px;">
+            <div style="font-size:0.72rem;font-weight:700;color:rgba(255,255,255,0.3);text-transform:uppercase;letter-spacing:1px;margin-bottom:10px;">Verified Emails</div>
+            <div id="verifiedEmailList" style="display:flex;flex-direction:column;gap:8px;">
+              <div style="color:var(--text-muted);font-size:0.82rem;padding:10px 0;">
+                <i class="fas fa-spinner fa-spin"></i> Loading...
+              </div>
+            </div>
+          </div>
+
+          <div style="margin-top:16px;border-top:1px solid var(--border);padding-top:14px;">
+            <button class="btn btn-outline btn-sm" id="btnSendEmailTest">
+              <i class="fas fa-paper-plane"></i> Send Test Alert to All
+            </button>
+          </div>
+        </div>
+
+        <div class="card-panel">
+          <h4><i class="fas fa-bell"></i> Alert Preferences</h4>
+          <div class="setting-row">
+            <div>
+              <div class="setting-label">Email Alerts</div>
+              <div class="setting-desc">Send alerts via Gmail SMTP</div>
+            </div>
+            <label class="toggle-switch"><input type="checkbox" id="emailAlertToggle"><span
+                class="toggle-slider"></span></label>
+          </div>
+          <div class="setting-row">
+            <div>
+              <div class="setting-label">Push Notifications</div>
+              <div class="setting-desc">Firebase FCM push alerts</div>
+            </div>
+            <label class="toggle-switch"><input type="checkbox" id="pushAlertToggle"><span
+                class="toggle-slider"></span></label>
+          </div>
+          <div class="setting-row">
+            <div>
+              <div class="setting-label">Sound Notifications</div>
+              <div class="setting-desc">Play sound on detection</div>
+            </div>
+            <label class="toggle-switch"><input type="checkbox" id="soundSettingToggle" checked><span
+                class="toggle-slider"></span></label>
+          </div>
+        </div>
+
+        <div class="card-panel">
+          <h4><i class="fas fa-sliders-h"></i> Detection Settings</h4>
+          <div class="setting-row">
+            <div>
+              <div class="setting-label">Confidence Threshold (%)</div>
+              <div class="setting-desc">Minimum accuracy for detection</div>
+            </div>
+            <div style="display:flex; align-items:center; gap:10px;">
+              <input type="range" id="confThreshold" min="50" max="99" value="70" class="volume-slider">
+              <span id="confVal" style="font-size:0.85rem; font-weight:700; width:40px;">70%</span>
+            </div>
+          </div>
+          <div style="margin-top:20px; display:flex; gap:10px;">
+            <button class="btn btn-primary" id="saveSettingsBtn" style="flex:1;">
+              <i class="fas fa-save"></i> Save All
+            </button>
+            <button class="btn btn-outline" id="testAlertSettingsBtn" style="flex:1;">
+              <i class="fas fa-flask"></i> Test Alert
+            </button>
+          </div>
+        </div>
+
+        <div class="card-panel">
+          <h4><i class="fas fa-user-circle"></i> Account</h4>
+          <div class="user-profile-info">
+            <div class="avatar large" id="accountAvatar">D</div>
+            <div>
+              <div style="font-weight:700;font-size:1.1rem" id="accountUserName">Demo User</div>
+              <div style="color:rgba(255,255,255,0.4);font-size:0.85rem" id="accountEmail">admin@vigilanteye.com</div>
+              <div class="role-badge" id="accountUserRole">Administrator</div>
+            </div>
+          </div>
+
+          <a href="javascript:void(0)" onclick="logout()" class="btn btn-outline-danger" style="margin-top:16px;display:inline-block">
+            <i class="fas fa-sign-out-alt"></i> Logout
+          </a>
+        </div>
+      </div>
+
+      <div class="card-panel" style="margin-top:20px;">
+        <h4><i class="fas fa-users"></i> User Management</h4>
+        <div class="table-wrap">
+          <table class="data-table" id="usersManageTable">
+            <thead>
+              <tr>
+                <th>Name</th>
+                <th>Email</th>
+                <th>Role</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody id="usersManageBody">
+              <tr>
+                <td colspan="4" class="loading-row">Loading users...</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- ════════════════ MODALS ════════════════ -->
+  <!-- Snapshot Modal -->
+  <div class="modal-overlay" id="snapshotModal" style="display:none">
+    <div class="modal">
+      <div class="modal-header">
+        <h4>Event Snapshot</h4>
+        <button class="modal-close" onclick="closeModal('snapshotModal')"><i class="fas fa-times"></i></button>
+      </div>
+      <div class="modal-body">
+        <img id="snapshotImg" src="" alt="Event snapshot" style="width:100%;border-radius:10px;">
+        <div id="snapshotInfo" style="margin-top:15px;"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Alert Sound AudioContext -->
+  <audio id="alertAudio" preload="auto"></audio>
+
+  <script src="static/js/alerts.js"></script>
+  <script src="static/js/charts.js"></script>
+  <script src="static/js/dashboard.js"></script>
+  <!-- UX Enhancer: smooth transitions, ripples, page-loader, performance layer -->
+  <script src="static/js/ux_enhancer.js" defer></script>
+</body>
+
+</html>

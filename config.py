@@ -6,11 +6,14 @@ Edit this file to configure your email, Firebase, and other settings.
 
 import os
 from pathlib import Path
+from dotenv import load_dotenv
 
 # ─────────────────────────────────────────────
 # Base Paths
 # ─────────────────────────────────────────────
 BASE_DIR = Path(__file__).parent
+load_dotenv(BASE_DIR / ".env")
+
 DB_PATH = BASE_DIR / "database" / "vigilant_eye.db"
 SNAPSHOTS_DIR = BASE_DIR / "snapshots"
 MODELS_DIR = BASE_DIR / "models"
@@ -30,6 +33,7 @@ class Config:
     SQLALCHEMY_DATABASE_URI = f"sqlite:///{DB_PATH}"
     SQLALCHEMY_TRACK_MODIFICATIONS = False
     MAX_CONTENT_LENGTH = 50 * 1024 * 1024  # 50MB max upload
+    GOOGLE_CLIENT_ID = os.environ.get("GOOGLE_CLIENT_ID", "your-google-client-id-here.apps.googleusercontent.com")
 
     # Session
     SESSION_PERMANENT = False
@@ -41,12 +45,12 @@ class Config:
 # Email Configuration (Gmail SMTP)
 # ─────────────────────────────────────────────
 EMAIL_CONFIG = {
-    "enabled": True,  # Set to True after adding credentials
-    "sender_email": "yourmail@gmail.com",         # << Change this
-    "sender_password": "use your key",    # << Use Gmail App Password
-    "recipient_email": "alert_recipient@gmail.com", # << Change this
-    "smtp_host": "smtp.gmail.com",
-    "smtp_port": 587,
+    "enabled": os.environ.get("EMAIL_ENABLED", "True").lower() == "true",
+    "sender_email": os.environ.get("SENDER_EMAIL", "your_email@gmail.com"),         # << Set in .env or update here
+    "sender_password": os.environ.get("SENDER_PASSWORD", "your_16_digit_app_password"),    # << Use Gmail App Password
+    "recipient_email": os.environ.get("RECIPIENT_EMAIL", "alert_recipient@gmail.com"), # << Set recipient email
+    "smtp_host": os.environ.get("SMTP_HOST", "smtp.gmail.com"),
+    "smtp_port": int(os.environ.get("SMTP_PORT", 587)),
 }
 
 # ─────────────────────────────────────────────
@@ -129,17 +133,17 @@ ALERT_CONFIG = {
 TRAINING_CONFIG = {
     "dataset_path": str(DATASET_DIR),
     "epochs": 50,
-    "batch_size": 16, # Optimized for GPU VRAM (4GB) - Increased for faster training
+    "batch_size": 2, # Optimized for GPU VRAM (4GB) - Reduced to prevent OOM
     "img_size": 416,  # Optimized for speed
     "output_dir": str(MODELS_DIR),
     "model_base": "yolov8n.pt",
     "device": 0,      # Use GPU 0
-    "workers": 8,     # Parallel data loading - Increased for speed
-    "cache": True,    # RAM cache for speed
+    "workers": 0,     # Parallel data loading - Set to 0 to prevent Windows multiprocessing/CUDA crashes
+    "cache": False,   # Disabled RAM cache to save resources
     "amp": True,      # Automatic Mixed Precision
     "optimizer": "auto", 
     "patience": 50,   # Early stopping
-    "close_mosaic": 10, 
+    "close_mosaic": 10,  
 }
 
 # ─────────────────────────────────────────────

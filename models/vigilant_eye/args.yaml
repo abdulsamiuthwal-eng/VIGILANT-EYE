@@ -2,16 +2,16 @@ task: detect
 mode: train
 model: yolov8n.pt
 data: D:\sami\a\VIGILANT EYE\dataset\data.yaml
-epochs: 50
+epochs: 141
 time: null
 patience: 50
-batch: 16
+batch: 59
 imgsz: 416
 save: true
 save_period: -1
-cache: true
+cache: false
 device: '0'
-workers: 8
+workers: 0
 project: D:\sami\a\VIGILANT EYE\models
 name: vigilant_eye
 exist_ok: true

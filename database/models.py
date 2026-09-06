@@ -20,11 +20,15 @@ class User(UserMixin, db.Model):
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(100), nullable=False)
     email = db.Column(db.String(150), unique=True, nullable=False, index=True)
-    password_hash = db.Column(db.String(255), nullable=False)
+    password_hash = db.Column(db.String(255), nullable=True)
     role = db.Column(db.String(20), default="operator")  # admin / operator
     is_active = db.Column(db.Boolean, default=True)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
     last_login = db.Column(db.DateTime, nullable=True)
+    email_verified = db.Column(db.Boolean, default=False)
+    profile_picture_url = db.Column(db.String(255), nullable=True)
+    auth_method = db.Column(db.String(50), default="local")
+    verification_token = db.Column(db.String(100), nullable=True)
 
     # Preferences
     email_alerts = db.Column(db.Boolean, default=True)
@@ -48,6 +52,9 @@ class User(UserMixin, db.Model):
             "email_alerts": self.email_alerts,
             "push_alerts": self.push_alerts,
             "sound_alerts": self.sound_alerts,
+            "profile_picture_url": self.profile_picture_url,
+            "email_verified": self.email_verified,
+            "auth_method": self.auth_method,
         }
 
     def __repr__(self):

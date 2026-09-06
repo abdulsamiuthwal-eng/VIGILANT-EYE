@@ -115,6 +115,14 @@ def index():
     return render_template("dashboard.html", user=current_user, theme=theme,
                            email_js=EMAIL_API_CONFIG, dev_keyword=DEVELOPER_CONFIG["keyword"])
 
+
+@dashboard_bp.route("/post-login-splash")
+@login_required
+def post_login_splash():
+    """Premium post-login AI loading screen shown once per login before dashboard."""
+    return render_template("post_login_splash.html")
+
+
 app.register_blueprint(dashboard_bp)
 
 # ─────────────────────────────────────────────
@@ -388,7 +396,8 @@ from database.models import TrainingSession
 def start_training():
     data = request.get_json() or {}
     epochs = data.get("epochs", 50)
-    batch = data.get("batch_size", 16)
+    from config import TRAINING_CONFIG
+    batch = data.get("batch_size", TRAINING_CONFIG["batch_size"])
     dev_keyword = data.get("developer_keyword", "")
 
     if dev_keyword != DEVELOPER_CONFIG["keyword"]:
@@ -538,7 +547,31 @@ def server_error(e):
 # ─────────────────────────────────────────────
 def initialize_app():
     with app.app_context():
-        db.create_all()
+        # Check and migrate user table columns
+        from sqlalchemy import text
+        try:
+            db.create_all()
+            with db.engine.connect() as conn:
+                # Get current columns
+                columns = [row[1] for row in conn.execute(text("PRAGMA table_info(users)")).fetchall()]
+                
+                # Check for each column and alter table if missing
+                if "email_verified" not in columns:
+                    conn.execute(text("ALTER TABLE users ADD COLUMN email_verified BOOLEAN DEFAULT 1"))
+                    logger.info("Added column email_verified to users table")
+                if "profile_picture_url" not in columns:
+                    conn.execute(text("ALTER TABLE users ADD COLUMN profile_picture_url VARCHAR(255) NULL"))
+                    logger.info("Added column profile_picture_url to users table")
+                if "auth_method" not in columns:
+                    conn.execute(text("ALTER TABLE users ADD COLUMN auth_method VARCHAR(50) DEFAULT 'local'"))
+                    logger.info("Added column auth_method to users table")
+                if "verification_token" not in columns:
+                    conn.execute(text("ALTER TABLE users ADD COLUMN verification_token VARCHAR(100) NULL"))
+                    logger.info("Added column verification_token to users table")
+                conn.commit()
+        except Exception as e:
+            logger.error(f"Error during users database schema migration: {e}")
+
         from database.db_manager import SettingsManager
         SettingsManager.initialize_defaults()
 

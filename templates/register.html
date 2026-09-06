@@ -3,9 +3,10 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Register — Vigilant Eye</title>
+<title>Create Account — Vigilant Eye</title>
 <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700;900&display=swap" rel="stylesheet">
 <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet">
+<script src="https://accounts.google.com/gsi/client" async defer></script>
 <style>
   *{margin:0;padding:0;box-sizing:border-box;}
   body{font-family:'Outfit',sans-serif;background:#020818;color:#fff;min-height:100vh;display:flex;align-items:center;justify-content:center;position:relative;overflow:hidden;padding:20px 0;}
@@ -21,9 +22,7 @@
   .flash{padding:11px 15px;border-radius:10px;margin-bottom:16px;font-size:0.86rem;display:flex;align-items:center;gap:8px;}
   .flash.danger{background:rgba(255,60,60,0.15);border:1px solid rgba(255,60,60,0.3);color:#ff8080;}
   .flash.success{background:rgba(0,200,100,0.15);border:1px solid rgba(0,200,100,0.3);color:#80ffb0;}
-  .form-row{display:grid;grid-template-columns:1fr 1fr;gap:15px;}
   .form-group{margin-bottom:18px;position:relative;}
-  .form-group.full-width{grid-column:1/-1;}
   label{display:block;font-size:0.78rem;color:rgba(255,255,255,0.45);margin-bottom:7px;font-weight:600;letter-spacing:0.5px;text-transform:uppercase;}
   .input-wrap{position:relative;}
   .input-icon{position:absolute;left:13px;top:50%;transform:translateY(-50%);color:rgba(255,255,255,0.25);font-size:0.85rem;}
@@ -40,6 +39,9 @@
   .error-text{font-size:0.75rem;color:#ff6666;margin-top:5px;display:none;}
   .btn-primary{width:100%;padding:14px;border:none;border-radius:12px;background:linear-gradient(135deg,#0052cc,#00a8ff);color:#fff;font-family:'Outfit',sans-serif;font-size:0.98rem;font-weight:700;cursor:pointer;letter-spacing:0.5px;transition:all 0.25s;margin-top:8px;}
   .btn-primary:hover{transform:translateY(-2px);box-shadow:0 10px 30px rgba(0,120,255,0.4);}
+  .divider{display:flex;align-items:center;gap:12px;margin:22px 0;color:rgba(255,255,255,0.18);font-size:0.75rem;}
+  .divider::before,.divider::after{content:'';flex:1;height:1px;background:rgba(255,255,255,0.08);}
+  .google-btn-wrap{display:flex;justify-content:center;min-height:44px;margin-bottom:4px;}
   .terms{font-size:0.78rem;color:rgba(255,255,255,0.3);text-align:center;margin-top:14px;line-height:1.5;}
   .login-link{text-align:center;font-size:0.86rem;color:rgba(255,255,255,0.4);margin-top:18px;}
   .login-link a{color:#00c8ff;text-decoration:none;font-weight:600;}
@@ -60,14 +62,16 @@
   <h1>Create Account</h1>
   <p class="subtitle">Join the surveillance network</p>
 
-  {% with messages = get_flashed_messages(with_categories=true) %}
-    {% for category, message in messages %}
-      <div class="flash {{ category }}">
-        <i class="fas fa-{% if category == 'danger' %}exclamation-circle{% else %}check-circle{% endif %}"></i>
-        {{ message }}
-      </div>
-    {% endfor %}
-  {% endwith %}
+  <div id="flashContainer">
+    {% with messages = get_flashed_messages(with_categories=true) %}
+      {% for category, message in messages %}
+        <div class="flash {{ category }}">
+          <i class="fas fa-{% if category == 'danger' %}exclamation-circle{% else %}check-circle{% endif %}"></i>
+          {{ message }}
+        </div>
+      {% endfor %}
+    {% endwith %}
+  </div>
 
   <form id="regForm" method="POST" action="/register">
     <div class="form-group">
@@ -90,11 +94,14 @@
       <label>Password</label>
       <div class="input-wrap">
         <i class="fas fa-lock input-icon"></i>
-        <input type="password" name="password" id="password" placeholder="Min 8 characters" required autocomplete="new-password">
+        <input type="password" name="password" id="password" placeholder="Min 8 characters (1 uppercase, 1 number, 1 special)" required autocomplete="new-password">
         <i class="fas fa-eye toggle-pass" id="tp1"></i>
       </div>
       <div class="strength-bar"><div class="strength-fill" id="strengthFill"></div></div>
-      <div class="strength-text" id="strengthText"></div>
+      <div style="display: flex; justify-content: space-between; align-items: center;">
+        <div class="strength-text" id="strengthText"></div>
+        <div style="font-size: 0.72rem; color: rgba(255,255,255,0.3); margin-top: 4px;">Req: A-Z, 0-9, !@#$%^&*</div>
+      </div>
       <div class="error-text" id="passErr"></div>
     </div>
     <div class="form-group">
@@ -111,6 +118,11 @@
     </button>
     <p class="terms">By creating an account, you agree to use this system responsibly for legitimate security purposes only.</p>
   </form>
+
+  <div class="divider">or</div>
+
+  <!-- Google Sign-Up Button -->
+  <div class="google-btn-wrap" id="googleRegBtnContainer"></div>
 
   <div class="login-link">Already have an account? <a href="/login">Sign in</a></div>
 </div>
@@ -152,6 +164,82 @@
     btn.innerHTML = '<span class="spinner"></span>Creating account...';
     btn.disabled = true;
   });
+
+  // ────────────────────────────────────────────────────────
+  // Google Sign-Up Integration
+  // ────────────────────────────────────────────────────────
+
+  function showFlashMessage(message, category) {
+    const container = document.getElementById("flashContainer");
+    if (!container) return;
+    container.innerHTML = `
+      <div class="flash ${category}">
+        <i class="fas fa-${category === 'danger' ? 'exclamation-circle' : 'check-circle'}"></i>
+        ${message}
+      </div>
+    `;
+  }
+
+  function handleGoogleRegisterResponse(response) {
+    const container = document.getElementById("googleRegBtnContainer");
+    container.innerHTML = '<div style="color:#00c8ff;font-weight:600;font-size:0.88rem;display:flex;align-items:center;gap:8px;"><span class="spinner"></span>Creating account with Google...</div>';
+
+    fetch("/auth/google-register", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ credential: response.credential })
+    })
+    .then(res => res.json())
+    .then(data => {
+      if (data.success) {
+        showFlashMessage(data.message || "Account created! Redirecting...", "success");
+        setTimeout(() => {
+          window.location.href = data.redirect || "/post-login-splash";
+        }, 800);
+      } else {
+        showFlashMessage(data.message || "Google sign-up failed. Please try again.", "danger");
+        setTimeout(() => { window.location.reload(); }, 3000);
+      }
+    })
+    .catch(err => {
+      console.error("Google Register Error:", err);
+      showFlashMessage("A network error occurred. Please try again.", "danger");
+      setTimeout(() => { window.location.reload(); }, 3000);
+    });
+  }
+
+  window.onload = function () {
+    const clientId = "{{ google_client_id }}";
+    const container = document.getElementById("googleRegBtnContainer");
+
+    if (clientId && clientId.length > 10) {
+      google.accounts.id.initialize({
+        client_id: clientId,
+        callback: handleGoogleRegisterResponse
+      });
+      google.accounts.id.renderButton(
+        container,
+        {
+          theme: "outline",
+          size: "large",
+          width: "362",
+          text: "signup_with",
+          shape: "rectangular",
+          logo_alignment: "center"
+        }
+      );
+    } else {
+      // Google Client ID not configured — clean informational notice only
+      container.innerHTML = `
+        <div style="width:100%;max-width:362px;padding:12px 16px;background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.08);border-radius:8px;color:rgba(255,255,255,0.3);font-family:'Outfit',sans-serif;font-size:0.82rem;display:flex;align-items:center;gap:10px;">
+          <svg style="width:16px;height:16px;flex-shrink:0;" viewBox="0 0 24 24">
+            <path fill="rgba(255,255,255,0.3)" d="M12.24 10.285V14.4h6.887c-.648 2.41-2.519 4.114-5.136 4.114A5.856 5.856 0 0 1 8.1 12.657a5.856 5.856 0 0 1 5.89-5.858c1.454 0 2.782.532 3.804 1.411l3.056-3.055C18.948 3.312 16.632 2 13.99 2 8.474 2 4 6.474 4 12s4.474 10 9.99 10c6.046 0 9.61-4.248 8.878-10.286H12.24Z"/>
+          </svg>
+          <span>Google Sign-Up not configured</span>
+        </div>
+      `;
+    }
+  };
 </script>
 </body>
 </html>

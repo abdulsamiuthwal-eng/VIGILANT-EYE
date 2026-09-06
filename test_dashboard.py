@@ -19,7 +19,7 @@ def setup_test_user():
             db.session.commit()
             
         # Create fresh test user
-        user = User(name="Selenium Test User", email="selenium_test@vigilanteye.com", role="admin")
+        user = User(name="Selenium Test User", email="selenium_test@vigilanteye.com", role="admin", email_verified=True)
         user.set_password("password123")
         db.session.add(user)
         db.session.commit()
@@ -83,8 +83,8 @@ def test_login_with_correct_credentials(driver):
     submit_button = driver.find_element(By.ID, "loginBtn")
     submit_button.click()
     
-    # Wait for Simulated Secure Session Initialization Delay (2.5 seconds in JS) and redirects
-    time.sleep(5)
+    # Wait for Simulated Secure Session Initialization Delay (2.5 seconds in JS) and splash redirects
+    time.sleep(8)
 
     assert "dashboard" in driver.current_url.lower(), f"Failed to log in. URL is still: {driver.current_url}"
 

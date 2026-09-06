@@ -135,6 +135,18 @@ names:
         _emit_progress(_training_status.copy())
 
         try:
+            import torch
+            logger.info("============== TRAINING ENVIRONMENT DIAGNOSTIC ==============")
+            logger.info(f"Python interpreter: {os.sys.executable if hasattr(os, 'sys') else 'N/A'}")
+            logger.info(f"PyTorch version: {torch.__version__}")
+            logger.info(f"CUDA available: {torch.cuda.is_available()}")
+            if torch.cuda.is_available():
+                logger.info(f"Active GPU device: {torch.cuda.get_device_name(0)}")
+                logger.info(f"CUDA device capability: {torch.cuda.get_device_capability(0)}")
+            else:
+                logger.warning("CUDA is NOT available on PyTorch in this process!")
+            logger.info("=============================================================")
+
             from ultralytics import YOLO
 
             data_yaml = str(self.dataset_path / "data.yaml")
@@ -172,8 +184,8 @@ names:
                 exist_ok=True,
                 verbose=False,
                 device=self.config.get("device", 0),
-                workers=self.config.get("workers", 8),
-                cache=self.config.get("cache", True),
+                workers=self.config.get("workers", 0),
+                cache=self.config.get("cache", False),
                 amp=self.config.get("amp", True),
                 optimizer=self.config.get("optimizer", "auto"),
                 patience=self.config.get("patience", 50),
@@ -230,6 +242,30 @@ names:
                 "running": False, "status": "failed",
                 "error": "ultralytics not installed. Run: pip install ultralytics",
                 "message": "Training failed — missing dependency.",
+                "start_time": None,
+            })
+            _emit_progress(_training_status.copy())
+        except torch.cuda.OutOfMemoryError as oom:
+            err_msg = f"CUDA Out Of Memory during training: {oom}"
+            logger.error(err_msg, exc_info=True)
+            _training_status.update({
+                "running": False, "status": "failed",
+                "error": err_msg,
+                "message": "Training failed: CUDA Out Of Memory. Try reducing batch size or image size.",
+                "start_time": None,
+            })
+            _emit_progress(_training_status.copy())
+        except RuntimeError as re:
+            err_msg = str(re)
+            if "CUDA" in err_msg or "device" in err_msg.lower() or "out of memory" in err_msg.lower():
+                err_msg = f"Fatal CUDA Exception during training: {re}"
+            else:
+                err_msg = f"RuntimeError during training: {re}"
+            logger.error(err_msg, exc_info=True)
+            _training_status.update({
+                "running": False, "status": "failed",
+                "error": err_msg,
+                "message": f"Training failed: {err_msg}",
                 "start_time": None,
             })
             _emit_progress(_training_status.copy())
