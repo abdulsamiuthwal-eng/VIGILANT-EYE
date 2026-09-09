@@ -3,16 +3,25 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Initializing — Vigilant Eye</title>
+  <title>Authorizing Sentinel Session — Vigilant Eye</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700;900&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700;800;900&family=JetBrains+Mono:wght@400;600;700&display=swap" rel="stylesheet">
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet">
   <style>
     *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
 
+    :root {
+      --palette-coral: #D96868;
+      --palette-sage: #91AE6E;
+      --palette-forest: #689D4B;
+      --palette-bg: #181C19;
+      --palette-text: #F2F2F2;
+    }
+
     body {
       font-family: 'Outfit', sans-serif;
-      background: #03080e;
-      color: #E3FDFD;
+      background: #121513;
+      color: #F2F2F2;
       height: 100vh;
       display: flex;
       flex-direction: column;
@@ -20,374 +29,342 @@
       justify-content: center;
       overflow: hidden;
       position: relative;
-      /* Start invisible — JS fades in */
-      opacity: 0;
-      animation: bodyFadeIn 0.35s ease 0.05s forwards;
-    }
-    @keyframes bodyFadeIn {
-      to { opacity: 1; }
     }
 
-    /* ── Animated background grid ── */
+    /* Ambient cyber grid */
     .grid-bg {
       position: fixed; inset: 0;
       background-image:
-        linear-gradient(rgba(113,201,206,0.04) 1px, transparent 1px),
-        linear-gradient(90deg, rgba(113,201,206,0.04) 1px, transparent 1px);
-      background-size: 50px 50px;
-      animation: gridMove 20s linear infinite;
+        linear-gradient(rgba(145, 174, 110, 0.08) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(145, 174, 110, 0.08) 1px, transparent 1px);
+      background-size: 40px 40px;
+      animation: gridMove 25s linear infinite;
       pointer-events: none;
     }
     @keyframes gridMove {
-      0%   { background-position: 0 0; }
-      100% { background-position: 50px 50px; }
+      0% { background-position: 0 0; }
+      100% { background-position: 40px 40px; }
     }
 
-    /* ── Radial glow ── */
-    .glow {
+    /* Radial glow backdrop */
+    .ambient-glow {
       position: fixed;
-      width: 700px; height: 700px;
+      width: 750px; height: 750px;
       border-radius: 50%;
-      background: radial-gradient(circle, rgba(113,201,206,0.15) 0%, rgba(166,227,233,0.05) 45%, transparent 70%);
+      background: radial-gradient(circle, rgba(217, 104, 104, 0.16) 0%, rgba(145, 174, 110, 0.08) 40%, transparent 70%);
       top: 50%; left: 50%;
       transform: translate(-50%, -50%);
-      animation: glowPulse 3.5s ease-in-out infinite;
       pointer-events: none;
-      will-change: transform, opacity;
+      animation: glowBreathing 4s ease-in-out infinite alternate;
     }
-    @keyframes glowPulse {
-      0%, 100% { transform: translate(-50%, -50%) scale(1);   opacity: 1;   }
-      50%       { transform: translate(-50%, -50%) scale(1.18); opacity: 0.75; }
+    @keyframes glowBreathing {
+      0% { transform: translate(-50%, -50%) scale(0.92); opacity: 0.7; }
+      100% { transform: translate(-50%, -50%) scale(1.15); opacity: 1; }
     }
 
-    /* ── Corner brackets ── */
-    .corner { position: fixed; width: 30px; height: 30px; pointer-events: none; z-index: 10; }
-    .corner.tl { top: 20px;    left: 20px;  border-top:    2px solid rgba(166,227,233,0.5); border-left:   2px solid rgba(166,227,233,0.5); }
-    .corner.tr { top: 20px;    right: 20px; border-top:    2px solid rgba(166,227,233,0.5); border-right:  2px solid rgba(166,227,233,0.5); }
-    .corner.bl { bottom: 20px; left: 20px;  border-bottom: 2px solid rgba(166,227,233,0.5); border-left:   2px solid rgba(166,227,233,0.5); }
-    .corner.br { bottom: 20px; right: 20px; border-bottom: 2px solid rgba(166,227,233,0.5); border-right:  2px solid rgba(166,227,233,0.5); }
-
-    /* ── Scanning line ── */
-    .scan-line {
+    /* Laser scan line */
+    .laser-scan {
       position: fixed; top: 0; left: 0; right: 0; height: 2px;
-      background: linear-gradient(90deg, transparent, #71C9CE, transparent);
-      animation: scanDown 2.6s linear infinite;
-      pointer-events: none; z-index: 20;
-      will-change: top;
+      background: linear-gradient(90deg, transparent 0%, #D96868 30%, #91AE6E 70%, transparent 100%);
+      box-shadow: 0 0 15px #D96868;
+      animation: scanDown 3s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+      pointer-events: none; z-index: 30;
     }
     @keyframes scanDown {
-      0%   { top: -2px; opacity: 0.9; }
-      100% { top: 100vh; opacity: 0.2; }
+      0% { top: -4px; opacity: 0.9; }
+      100% { top: 100vh; opacity: 0.15; }
     }
 
-    /* ── Horizontal sweep line across eye ── */
-    .eye-scan-sweep {
-      position: absolute;
-      left: 0; right: 0;
-      height: 2px;
-      background: linear-gradient(90deg, transparent 0%, rgba(166,227,233,0.95) 50%, transparent 100%);
-      border-radius: 1px;
-      animation: eyeSweep 1.6s ease-in-out infinite;
-      will-change: top, opacity;
+    /* Corner HUD brackets */
+    .corner-bracket {
+      position: fixed; width: 36px; height: 36px; pointer-events: none; z-index: 20;
     }
-    @keyframes eyeSweep {
-      0%   { top: 20%;   opacity: 0; }
-      20%  { opacity: 1; }
-      80%  { opacity: 1; }
-      100% { top: 80%;   opacity: 0; }
-    }
+    .corner-bracket.tl { top: 24px; left: 24px; border-top: 2px solid #91AE6E; border-left: 2px solid #91AE6E; }
+    .corner-bracket.tr { top: 24px; right: 24px; border-top: 2px solid #91AE6E; border-right: 2px solid #91AE6E; }
+    .corner-bracket.bl { bottom: 24px; left: 24px; border-bottom: 2px solid #91AE6E; border-left: 2px solid #91AE6E; }
+    .corner-bracket.br { bottom: 24px; right: 24px; border-bottom: 2px solid #91AE6E; border-right: 2px solid #91AE6E; }
 
-    /* ── Main container ── */
-    .splash-wrap {
+    /* Corner telemetry labels */
+    .corner-tag {
+      position: fixed; font-family: 'JetBrains Mono', monospace; font-size: 0.68rem;
+      color: rgba(145, 174, 110, 0.7); letter-spacing: 1.2px; text-transform: uppercase; z-index: 20;
+    }
+    .corner-tag.tl { top: 28px; left: 68px; }
+    .corner-tag.tr { top: 28px; right: 68px; text-align: right; }
+    .corner-tag.bl { bottom: 28px; left: 68px; }
+    .corner-tag.br { bottom: 28px; right: 68px; text-align: right; }
+
+    /* Main container */
+    .splash-container {
       position: relative; z-index: 10;
       display: flex; flex-direction: column;
-      align-items: center; gap: 0;
-      animation: wrapFadeUp 0.7s cubic-bezier(0.4,0,0.2,1) 0.1s both;
-    }
-    @keyframes wrapFadeUp {
-      from { opacity: 0; transform: translateY(28px); }
-      to   { opacity: 1; transform: translateY(0); }
+      align-items: center; justify-content: center;
+      width: 100%; max-width: 580px; padding: 20px;
     }
 
-    /* ── Logo / Eye icon ── */
-    .eye-ring {
-      width: 130px; height: 130px;
-      border-radius: 50%;
-      border: 2px solid rgba(113,201,206,0.3);
-      display: flex; align-items: center; justify-content: center;
+    /* 3D Iris / Aperture Ring */
+    .iris-wrap {
       position: relative;
-      animation: ringRotate 6s linear infinite;
-      will-change: transform;
+      width: 150px; height: 150px;
+      margin-bottom: 28px;
+      display: flex; align-items: center; justify-content: center;
     }
-    @keyframes ringRotate {
-      to { transform: rotate(360deg); }
-    }
-    .eye-ring::before {
-      content: '';
-      position: absolute; inset: -6px;
+    .outer-ring {
+      position: absolute; inset: 0;
+      border: 2px dashed rgba(145, 174, 110, 0.45);
       border-radius: 50%;
-      border: 1px dashed rgba(166,227,233,0.25);
-      animation: ringRotate 10s linear infinite reverse;
+      animation: spinClockwise 12s linear infinite;
     }
-    .eye-ring::after {
-      content: '';
-      position: absolute; inset: 6px;
+    .inner-ring {
+      position: absolute; inset: 12px;
+      border: 2px solid rgba(217, 104, 104, 0.5);
+      border-top-color: transparent;
+      border-bottom-color: transparent;
       border-radius: 50%;
-      border: 1px solid rgba(113,201,206,0.2);
+      animation: spinCounter 6s linear infinite;
     }
-
-    .eye-icon {
-      width: 104px; height: 104px;
-      background: linear-gradient(135deg, #71C9CE, #4ea8ae);
-      color: #03080e;
+    .iris-core {
+      width: 84px; height: 84px;
+      background: linear-gradient(135deg, #D96868 0%, #689D4B 100%);
       border-radius: 50%;
       display: flex; align-items: center; justify-content: center;
-      font-size: 48px;
-      box-shadow:
-        0 0 0 6px rgba(113,201,206,0.15),
-        0 0 45px rgba(113,201,206,0.6),
-        0 0 90px rgba(166,227,233,0.25);
-      animation: eyeGlow 2.2s ease-in-out infinite;
-      position: relative;
-      overflow: hidden;
-      will-change: box-shadow;
+      font-size: 38px; color: #FFFFFF;
+      box-shadow: 0 0 40px rgba(217, 104, 104, 0.55), 0 0 80px rgba(104, 157, 75, 0.3);
+      animation: corePulse 2s ease-in-out infinite;
+      position: relative; overflow: hidden;
     }
-    @keyframes eyeGlow {
-      0%, 100% {
-        box-shadow:
-          0 0 0 6px rgba(113,201,206,0.15),
-          0 0 45px rgba(113,201,206,0.6),
-          0 0 90px rgba(166,227,233,0.25);
-      }
-      50% {
-        box-shadow:
-          0 0 0 10px rgba(113,201,206,0.25),
-          0 0 65px rgba(166,227,233,0.85),
-          0 0 130px rgba(166,227,233,0.35);
-      }
+    .core-sweep {
+      position: absolute; left: 0; right: 0; height: 2px;
+      background: linear-gradient(90deg, transparent, #FFFFFF, transparent);
+      animation: coreSweepAnim 1.8s ease-in-out infinite;
+    }
+    @keyframes spinClockwise { to { transform: rotate(360deg); } }
+    @keyframes spinCounter { to { transform: rotate(-360deg); } }
+    @keyframes corePulse {
+      0%, 100% { transform: scale(1); box-shadow: 0 0 35px rgba(217, 104, 104, 0.5); }
+      50% { transform: scale(1.08); box-shadow: 0 0 60px rgba(217, 104, 104, 0.8), 0 0 100px rgba(104, 157, 75, 0.45); }
+    }
+    @keyframes coreSweepAnim {
+      0% { top: 15%; opacity: 0; }
+      50% { opacity: 1; }
+      100% { top: 85%; opacity: 0; }
     }
 
-    /* ── Brand name ── */
-    .brand-row { margin-top: 30px; text-align: center; }
-    .brand-name {
-      font-size: 2.6rem; font-weight: 900; letter-spacing: 5px;
-      background: linear-gradient(90deg, #E3FDFD, #A6E3E9, #71C9CE, #E3FDFD);
-      background-size: 200%;
-      -webkit-background-clip: text; -webkit-text-fill-color: transparent;
-      background-clip: text;
-      animation: shimmer 2.5s linear infinite;
-    }
-    @keyframes shimmer {
-      0%   { background-position: 0%; }
-      100% { background-position: 200%; }
+    /* Brand Typography */
+    .brand-title {
+      font-size: 2.6rem;
+      font-weight: 900;
+      letter-spacing: 5px;
+      text-transform: uppercase;
+      background: linear-gradient(135deg, #F2F2F2 0%, #D96868 60%, #91AE6E 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      margin-bottom: 6px;
+      text-shadow: 0 4px 30px rgba(217, 104, 104, 0.35);
     }
     .brand-tagline {
-      font-size: 0.78rem; color: rgba(203,241,245,0.5);
-      letter-spacing: 3.5px; text-transform: uppercase;
-      margin-top: 6px;
+      font-size: 0.86rem;
+      font-weight: 700;
+      color: rgba(242, 242, 242, 0.7);
+      letter-spacing: 3px;
+      text-transform: uppercase;
+      margin-bottom: 32px;
     }
 
-    /* ── Status text ticker ── */
-    .status-ticker {
-      margin-top: 42px;
-      display: flex; flex-direction: column; align-items: center; gap: 14px;
+    /* Glass Progress Console */
+    .console-card {
+      width: 100%;
+      background: rgba(24, 28, 25, 0.75);
+      border: 1px solid rgba(145, 174, 110, 0.35);
+      backdrop-filter: blur(20px) saturate(180%);
+      -webkit-backdrop-filter: blur(20px) saturate(180%);
+      border-radius: 16px;
+      padding: 22px 26px;
+      box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5), inset 0 1px 0 rgba(255, 255, 255, 0.1);
     }
 
-    .ticker-text {
-      font-size: 0.82rem; font-weight: 600; letter-spacing: 1.5px;
-      color: #A6E3E9; text-transform: uppercase;
-      min-height: 1.4em;
-      animation: tickerFadeIn 0.4s ease;
+    .console-status-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 12px;
+      font-family: 'JetBrains Mono', monospace;
     }
-    @keyframes tickerFadeIn {
-      from { opacity: 0; transform: translateY(6px); }
-      to   { opacity: 1; transform: translateY(0); }
+    .console-status-msg {
+      font-size: 0.84rem;
+      color: #F2F2F2;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .console-status-msg i {
+      color: #91AE6E;
+    }
+    .console-pct {
+      font-size: 1.05rem;
+      font-weight: 800;
+      color: #D96868;
+      font-variant-numeric: tabular-nums;
     }
 
-    /* ── Progress bar ── */
+    /* Progress bar */
     .progress-track {
-      width: 300px; height: 3px;
-      background: rgba(255,255,255,0.07);
-      border-radius: 2px; overflow: hidden;
+      width: 100%;
+      height: 6px;
+      background: rgba(255, 255, 255, 0.08);
+      border-radius: 4px;
+      overflow: hidden;
       position: relative;
     }
-    .progress-fill {
-      height: 100%; width: 0%;
-      background: linear-gradient(90deg, #71C9CE, #A6E3E9);
-      border-radius: 2px;
-      box-shadow: 0 0 10px rgba(113,201,206,0.8);
-      transition: width 0.35s cubic-bezier(0.4,0,0.2,1);
-      will-change: width;
-    }
-    /* shimmer overlay on progress bar */
-    .progress-track::after {
-      content: '';
-      position: absolute; top: 0; left: -60px;
-      width: 60px; height: 100%;
-      background: linear-gradient(90deg, transparent, rgba(227,253,253,0.35), transparent);
-      animation: barShimmer 1.4s ease infinite;
-    }
-    @keyframes barShimmer {
-      0%   { left: -60px; }
-      100% { left: 110%;  }
+    .progress-bar {
+      height: 100%;
+      width: 0%;
+      background: linear-gradient(90deg, #D96868 0%, #91AE6E 50%, #689D4B 100%);
+      border-radius: 4px;
+      box-shadow: 0 0 16px rgba(217, 104, 104, 0.8);
+      transition: width 0.35s cubic-bezier(0.4, 0, 0.2, 1);
     }
 
-    /* ── Three status dots ── */
-    .dot-row { display: flex; gap: 14px; margin-top: 4px; }
-    .dot {
-      width: 7px; height: 7px; border-radius: 50%;
-      animation: dotBlink 1.2s ease-in-out infinite;
+    .telemetry-pills {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-top: 16px;
+      padding-top: 14px;
+      border-top: 1px solid rgba(145, 174, 110, 0.15);
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.72rem;
+      color: rgba(242, 242, 242, 0.6);
     }
-    .dot:nth-child(1) { background: #71C9CE; animation-delay: 0s; }
-    .dot:nth-child(2) { background: #A6E3E9; animation-delay: 0.3s; }
-    .dot:nth-child(3) { background: #CBF1F5; animation-delay: 0.6s; }
-    @keyframes dotBlink {
-      0%, 100% { opacity: 0.2; transform: scale(1); }
-      50%       { opacity: 1;   transform: scale(1.4); }
+    .telemetry-pill {
+      display: flex;
+      align-items: center;
+      gap: 6px;
     }
-
-    /* ── "System Ready" final state ── */
-    .ready-badge {
-      display: none;
-      align-items: center; gap: 10px;
-      background: rgba(113,201,206,0.12);
-      border: 1px solid rgba(113,201,206,0.35);
-      border-radius: 30px; padding: 8px 22px;
-      font-size: 0.9rem; font-weight: 700;
-      color: #A6E3E9; letter-spacing: 1px;
-      animation: badgePop 0.5s cubic-bezier(0.4,0,0.2,1);
+    .pulse-dot {
+      width: 6px; height: 6px; border-radius: 50%;
+      background: #689D4B;
+      box-shadow: 0 0 8px #689D4B;
+      animation: pulseGlow 1.5s infinite;
     }
-    @keyframes badgePop {
-      from { transform: scale(0.8); opacity: 0; }
-      to   { transform: scale(1);   opacity: 1; }
-    }
-    .ready-dot {
-      width: 8px; height: 8px; border-radius: 50%;
-      background: #71C9CE;
-      box-shadow: 0 0 10px #71C9CE;
-      animation: dotBlink 1s ease-in-out infinite;
+    @keyframes pulseGlow {
+      0%, 100% { opacity: 1; transform: scale(1); }
+      50% { opacity: 0.4; transform: scale(1.3); }
     }
 
-    /* ── Fade-out overlay ── */
-    .fade-out-overlay {
+    /* Fade-out Overlay */
+    .fade-overlay {
       position: fixed; inset: 0;
-      background: #03080e;
+      background: #121513;
       opacity: 0; pointer-events: none;
-      transition: opacity 0.45s ease;
-      z-index: 9999;
-      will-change: opacity;
+      transition: opacity 0.5s ease;
+      z-index: 100;
     }
-    .fade-out-overlay.active { opacity: 1; pointer-events: all; }
-
-    /* ── Version label ── */
-    .version-label {
-      position: fixed; bottom: 22px;
-      font-size: 0.68rem; color: rgba(203,241,245,0.3);
-      letter-spacing: 1.5px; text-transform: uppercase;
-    }
+    .fade-overlay.active { opacity: 1; }
   </style>
 </head>
 <body>
-
-  <!-- Background layers -->
   <div class="grid-bg"></div>
-  <div class="glow"></div>
-  <div class="scan-line"></div>
-  <div class="corner tl"></div>
-  <div class="corner tr"></div>
-  <div class="corner bl"></div>
-  <div class="corner br"></div>
-  <div class="fade-out-overlay" id="fadeOverlay"></div>
+  <div class="ambient-glow"></div>
+  <div class="laser-scan"></div>
 
-  <!-- Main splash content -->
-  <div class="splash-wrap">
+  <!-- Corner HUD brackets & tags -->
+  <div class="corner-bracket tl"></div>
+  <div class="corner-tag tl">SYS.MATRIX: ONLINE // LAT 34.0522° N</div>
+  
+  <div class="corner-bracket tr"></div>
+  <div class="corner-tag tr">CORE: YOLOv8-X // AES-256</div>
 
-    <!-- Eye + rotating ring -->
-    <div class="eye-ring">
-      <div class="eye-icon">
+  <div class="corner-bracket bl"></div>
+  <div class="corner-tag bl">SENTINEL PROTOCOL: SECURE</div>
+
+  <div class="corner-bracket br"></div>
+  <div class="corner-tag br">BUILD: v2.4.0-PRO</div>
+
+  <div class="fade-overlay" id="fadeOverlay"></div>
+
+  <div class="splash-container">
+    <!-- Iris Aperture -->
+    <div class="iris-wrap">
+      <div class="outer-ring"></div>
+      <div class="inner-ring"></div>
+      <div class="iris-core">
         👁
-        <div class="eye-scan-sweep"></div>
+        <div class="core-sweep"></div>
       </div>
     </div>
 
-    <!-- Brand -->
-    <div class="brand-row">
-      <div class="brand-name">VIGILANT EYE</div>
-      <div class="brand-tagline">AI-Powered Surveillance System</div>
-    </div>
+    <!-- Title -->
+    <h1 class="brand-title">Vigilant Eye</h1>
+    <p class="brand-tagline">AI Surveillance &amp; Shoplifting Prevention</p>
 
-    <!-- Status ticker -->
-    <div class="status-ticker">
-      <div class="ticker-text" id="tickerText">Initializing AI Engine...</div>
+    <!-- Glass Console -->
+    <div class="console-card">
+      <div class="console-status-row">
+        <div class="console-status-msg">
+          <i class="fas fa-terminal"></i>
+          <span id="statusMsg">Initializing AI Engine...</span>
+        </div>
+        <div class="console-pct" id="pctCounter">0%</div>
+      </div>
+
       <div class="progress-track">
-        <div class="progress-fill" id="progressFill"></div>
+        <div class="progress-bar" id="progressBar"></div>
       </div>
-      <div class="dot-row" id="dotRow">
-        <div class="dot"></div>
-        <div class="dot"></div>
-        <div class="dot"></div>
-      </div>
-      <div class="ready-badge" id="readyBadge">
-        <div class="ready-dot"></div>
-        System Ready
+
+      <div class="telemetry-pills">
+        <div class="telemetry-pill">
+          <span class="pulse-dot"></span>
+          <span>GPU ACCEL: ACTIVE</span>
+        </div>
+        <div class="telemetry-pill">
+          <i class="fas fa-shield-alt" style="color:var(--palette-coral);"></i>
+          <span>SURVEILLANCE ARMED</span>
+        </div>
+        <div class="telemetry-pill">
+          <i class="fas fa-wifi" style="color:var(--palette-forest);"></i>
+          <span>RTSP: READY</span>
+        </div>
       </div>
     </div>
-
   </div>
 
-  <div class="version-label">v2.0.0 &nbsp;|&nbsp; Vigilant Eye &nbsp;|&nbsp; AI Surveillance</div>
-
   <script>
-    // ── Ticker sequence ──
+
     const steps = [
-      { text: "Initializing AI Engine...",         pct: 18  },
-      { text: "Loading Surveillance Modules...",   pct: 42  },
-      { text: "Preparing Camera Streams...",       pct: 66  },
-      { text: "Securing Dashboard...",             pct: 85  },
-      { text: "System Ready",                      pct: 100 },
+      { text: "Verifying Sentinel Biometric Session...", pct: 20 },
+      { text: "Mounting Encrypted Camera Pipelines...", pct: 45 },
+      { text: "Initializing DeepSORT Multi-Object Tracker...", pct: 72 },
+      { text: "Synchronizing Surveillance Dashboard...", pct: 90 },
+      { text: "Session Authorized. Access Granted.", pct: 100 }
     ];
+    const sessionKey = 'post_login_shown';
+    const totalTime = 2700;
+        
 
-    const tickerEl  = document.getElementById('tickerText');
-    const fillEl    = document.getElementById('progressFill');
-    const dotRow    = document.getElementById('dotRow');
-    const readyBadge = document.getElementById('readyBadge');
-    const overlay   = document.getElementById('fadeOverlay');
+    const statusEl = document.getElementById('statusMsg');
+    const pctEl = document.getElementById('pctCounter');
+    const barEl = document.getElementById('progressBar');
+    const overlay = document.getElementById('fadeOverlay');
 
-    // Step timings (ms from start)
-    const timings = [200, 700, 1200, 1800, 2350];
+    const stepDuration = totalTime / steps.length;
 
-    // Animate each step
-    timings.forEach((delay, i) => {
+    steps.forEach((step, idx) => {
       setTimeout(() => {
-        const step = steps[i];
-
-        // Update ticker text with fade
-        tickerEl.style.animation = 'none';
-        tickerEl.offsetHeight; // reflow
-        tickerEl.style.animation = 'tickerFadeIn 0.4s ease';
-        tickerEl.textContent = step.text;
-
-        // Advance progress bar
-        fillEl.style.width = step.pct + '%';
-
-        // Final state: show "System Ready" badge
-        if (i === steps.length - 1) {
-          dotRow.style.display  = 'none';
-          tickerEl.style.display = 'none';
-          readyBadge.style.display = 'flex';
-        }
-      }, delay);
+        statusEl.textContent = step.text;
+        pctEl.textContent = step.pct + '%';
+        barEl.style.width = step.pct + '%';
+      }, idx * stepDuration);
     });
 
-    // ── Redirect with fade-out ──
-    // Total splash visible time ≈ 2.85 s
     setTimeout(() => {
       overlay.classList.add('active');
+      sessionStorage.setItem(sessionKey, 'true');
       setTimeout(() => {
-        sessionStorage.setItem('post_login_shown', 'true');
-        window.location.href = '/dashboard';
-      }, 460); // wait for overlay fade
-    }, 2850);
+        window.location.href = "/dashboard";
+      }, 450);
+    }, totalTime + 150);
   </script>
 </body>
 </html>

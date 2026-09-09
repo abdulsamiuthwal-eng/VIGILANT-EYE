@@ -78,6 +78,7 @@ venv.bak/
 
 # Vigilant Eye Project Specific Security & Exclusions
 database/vigilant_eye.db
+vigilant_eye.db
 *.db
 *.db.bak
 *.local_backup
@@ -89,3 +90,12 @@ logs/
 serviceAccountKey.json
 train/
 valid/
+
+# Standalone Vercel Demo & Working Scratchpads (Kept on Local Disk, Excluded from GitHub)
+vercel_demo/
+scratch/
+vercel_checklist.md
+test_results.txt
+README.dataset.txt
+README.roboflow.txt
+

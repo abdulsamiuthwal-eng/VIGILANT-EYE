@@ -669,3 +669,63 @@ def check_auth():
         "authenticated": current_user.is_authenticated,
         "user": current_user.to_dict() if current_user.is_authenticated else None
     })
+
+
+# ─────────────────────────────────────────────────────────────────────────────
+# Profile API Routes
+# ─────────────────────────────────────────────────────────────────────────────
+
+@auth_bp.route("/api/profile/change-password", methods=["POST"])
+@login_required
+def profile_change_password():
+    """Change the current user's password after verifying the old one."""
+    data = request.get_json()
+    if not data:
+        return jsonify({"success": False, "message": "No data provided."}), 400
+
+    current_password = data.get("current_password", "")
+    new_password = data.get("new_password", "")
+
+    if not current_password or not new_password:
+        return jsonify({"success": False, "message": "All fields are required."}), 400
+
+    if len(new_password) < 8:
+        return jsonify({"success": False, "message": "Password must be at least 8 characters."}), 400
+
+    # Users logged in via Google may not have a local password
+    if current_user.auth_method == "google" and not current_user.password_hash:
+        return jsonify({"success": False, "message": "Google accounts cannot change password here. Use Google settings."}), 400
+
+    if not current_user.check_password(current_password):
+        return jsonify({"success": False, "message": "Current password is incorrect."}), 403
+
+    try:
+        current_user.set_password(new_password)
+        db.session.commit()
+        logger.info(f"Password changed for user: {current_user.email}")
+        return jsonify({"success": True, "message": "Password updated successfully."})
+    except Exception as e:
+        db.session.rollback()
+        logger.error(f"Error changing password: {e}")
+        return jsonify({"success": False, "message": "An error occurred. Please try again."}), 500
+
+
+@auth_bp.route("/api/profile/preferences", methods=["POST"])
+@login_required
+def profile_save_preferences():
+    """Save notification preferences for the current user."""
+    data = request.get_json()
+    if not data:
+        return jsonify({"success": False, "message": "No data provided."}), 400
+
+    try:
+        current_user.email_alerts = bool(data.get("email_alerts", current_user.email_alerts))
+        current_user.push_alerts = bool(data.get("push_alerts", current_user.push_alerts))
+        current_user.sound_alerts = bool(data.get("sound_alerts", current_user.sound_alerts))
+        db.session.commit()
+        logger.info(f"Preferences updated for user: {current_user.email}")
+        return jsonify({"success": True, "message": "Preferences saved."})
+    except Exception as e:
+        db.session.rollback()
+        logger.error(f"Error saving preferences: {e}")
+        return jsonify({"success": False, "message": "Failed to save preferences."}), 500

@@ -256,10 +256,10 @@ class EventManager:
 
 class SettingsManager:
     DEFAULTS = {
-        "alert_sound_enabled": "true",
+        "alert_sound_enabled": "false",
         "alert_volume": "0.8",
         "alert_tone": "default",
-        "global_alerts_enabled": "true",
+        "global_alerts_enabled": "false",
         "detection_confidence": "0.7",
         "theme": "dark",
         "email_alerts_enabled": "false",

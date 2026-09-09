@@ -6,7 +6,7 @@
 const AlertSystem = (() => {
   let socket = null;
   let alertCount = 0;
-  let soundEnabled = true;
+  let soundEnabled = false;
   let volume = 0.8;
   let audioCtx = null;
   let trainingStartTime = null;
@@ -36,25 +36,79 @@ const AlertSystem = (() => {
   }
 
   // ── Toast notification ──
-  function showToast(data) {
+  function showToast(data, customDuration) {
     const container = document.getElementById("toastContainer");
-    if (!container) return;
-    const severityIcon = { high: "🔴", medium: "🟠", low: "🟡" };
+    if (!container || !data) return;
+
+    // Handle plain string message case
+    if (typeof data === "string") {
+      const type = (typeof customDuration === "string") ? customDuration : "info";
+      if (typeof window.showInlineToast === "function") {
+        return window.showInlineToast(data, type);
+      }
+    }
+
+    const sev = (data.severity || "medium").toLowerCase();
+    const typeNorm = (sev === "high" || sev === "critical") ? "error" : sev === "low" ? "success" : "warning";
+    const iconMap = {
+      error:   "fas fa-shield-virus",
+      warning: "fas fa-exclamation-triangle",
+      success: "fas fa-shield-alt"
+    };
+    const iconClass = iconMap[typeNorm] || "fas fa-shield-alt";
+    const category = `SECURITY SENTINEL · ${sev.toUpperCase()} PRIORITY`;
+    const message = data.activity_type || "Suspicious Security Event";
+    const duration = 7500;
+
+    const chips = [];
+    if (data.camera_name) chips.push(`<span><i class="fas fa-video"></i> ${data.camera_name}</span>`);
+    if (data.confidence)  chips.push(`<span><i class="fas fa-bullseye"></i> ${data.confidence}% Conf</span>`);
+    if (data.timestamp)   chips.push(`<span><i class="fas fa-clock"></i> ${formatTime(data.timestamp)}</span>`);
+
     const toast = document.createElement("div");
-    toast.className = `toast ${data.severity || "medium"}`;
+    toast.className = `toast toast-${typeNorm} ${sev}`;
+    toast.setAttribute("role", "alert");
     toast.innerHTML = `
-      <div class="toast-icon">${severityIcon[data.severity] || "⚠️"}</div>
-      <div>
-        <div class="toast-title">⚠ ${data.activity_type}</div>
-        <div class="toast-body">
-          📹 ${data.camera_name} &nbsp;·&nbsp; ${data.confidence}% confidence<br>
-          🕒 ${formatTime(data.timestamp)}
-        </div>
+      <div class="toast-accent-bar"></div>
+      <div class="toast-icon-badge">
+        <i class="${iconClass}"></i>
       </div>
-      <button class="toast-close" onclick="this.parentElement.remove()">✕</button>
+      <div class="toast-content">
+        <div class="toast-header-row">
+          <span class="toast-category">${category}</span>
+        </div>
+        <div class="toast-title">${message}</div>
+        ${chips.length ? `<div class="toast-meta-chips">${chips.join('')}</div>` : ''}
+      </div>
+      <button class="toast-close" title="Dismiss notification" aria-label="Close">
+        <i class="fas fa-times"></i>
+      </button>
+      <div class="toast-progress" style="animation-duration: ${duration}ms;"></div>
     `;
+
+    function dismissToast() {
+      if (toast.classList.contains("dismissing")) return;
+      toast.classList.add("dismissing");
+      setTimeout(() => { if (toast.parentElement) toast.remove(); }, 350);
+    }
+
+    const closeBtn = toast.querySelector(".toast-close");
+    if (closeBtn) closeBtn.addEventListener("click", dismissToast);
+
     container.prepend(toast);
-    setTimeout(() => { if (toast.parentElement) toast.remove(); }, 8000);
+
+    let timer = setTimeout(dismissToast, duration);
+
+    toast.addEventListener("mouseenter", () => {
+      clearTimeout(timer);
+      const prog = toast.querySelector(".toast-progress");
+      if (prog) prog.style.animationPlayState = "paused";
+    });
+    toast.addEventListener("mouseleave", () => {
+      const prog = toast.querySelector(".toast-progress");
+      if (prog) prog.style.animationPlayState = "running";
+      timer = setTimeout(dismissToast, 2000);
+    });
   }
 
   // ── Add to alerts panel list ──
@@ -115,6 +169,13 @@ const AlertSystem = (() => {
   // ── Alert sound (Web Audio API) ──
   function playAlertSound() {
     try {
+      // Trigger sound wave bars active animation
+      const waveBars = document.getElementById("soundWaveBars");
+      if (waveBars) {
+        waveBars.classList.add("is-playing");
+        setTimeout(() => waveBars.classList.remove("is-playing"), 1200);
+      }
+
       if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
       
       const tone = document.getElementById("toneSelect")?.value || "beep";
@@ -403,15 +464,49 @@ const AlertSystem = (() => {
 document.addEventListener("DOMContentLoaded", () => {
   AlertSystem.init();
 
-  // Volume slider
+  // Volume slider & dynamic progress track fill
   const vol = document.getElementById("volumeSlider");
   const volVal = document.getElementById("volVal");
-  if (vol) vol.addEventListener("input", () => { if (volVal) volVal.textContent = vol.value + "%"; });
+  const waveBars = document.getElementById("soundWaveBars");
+
+  function updateVolumeFill() {
+    if (!vol) return;
+    const val = vol.value;
+    if (volVal) volVal.textContent = val + "%";
+    vol.style.setProperty("--vol-fill", val + "%");
+  }
+
+  if (vol) {
+    vol.addEventListener("input", updateVolumeFill);
+    updateVolumeFill();
+  }
 
   // Sound toggle
-  document.getElementById("soundToggle")?.addEventListener("change", function() {
-    soundEnabled = this.checked;
-  });
+  const soundToggle = document.getElementById("soundToggle");
+  if (soundToggle) {
+    soundToggle.addEventListener("change", function() {
+      soundEnabled = this.checked;
+      if (waveBars) {
+        if (this.checked) {
+          waveBars.classList.remove("is-muted");
+        } else {
+          waveBars.classList.add("is-muted");
+        }
+      }
+      fetch("/api/settings", {
+        method: "POST",
+        headers: {"Content-Type":"application/json"},
+        body: JSON.stringify({ alert_sound_enabled: this.checked ? "true" : "false" })
+      }).catch(() => {});
+    });
+  }
+
+  // Clicking wave bars triggers sound preview
+  if (waveBars) {
+    waveBars.addEventListener("click", () => {
+      AlertSystem.playAlertSound();
+    });
+  }
 
   // Test sound button
   document.getElementById("testSoundBtn")?.addEventListener("click", AlertSystem.playAlertSound);
@@ -448,6 +543,26 @@ document.addEventListener("DOMContentLoaded", () => {
       body: JSON.stringify({ global_alerts_enabled: this.checked ? "true" : "false" })
     });
   });
+
+  // Sync initial toggles from server settings
+  fetch("/api/settings")
+    .then(r => r.json())
+    .then(settings => {
+      const gToggle = document.getElementById("globalAlertsToggle");
+      if (gToggle) gToggle.checked = (settings.global_alerts_enabled === "true");
+
+      const sToggle = document.getElementById("soundToggle");
+      if (sToggle) {
+        sToggle.checked = (settings.alert_sound_enabled === "true");
+        soundEnabled = sToggle.checked;
+        const waveBars = document.getElementById("soundWaveBars");
+        if (waveBars) {
+          if (soundEnabled) waveBars.classList.remove("is-muted");
+          else waveBars.classList.add("is-muted");
+        }
+      }
+    })
+    .catch(() => {});
 
   AlertSystem.loadAlerts();
 });

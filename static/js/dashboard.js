@@ -10,12 +10,15 @@ function switchSection(sectionId) {
   // Hide all sections
   document.querySelectorAll(".section").forEach(s => s.classList.remove("active"));
   document.querySelectorAll(".nav-item").forEach(n => n.classList.remove("active"));
+  const profileTab = document.getElementById("sidebarFooter");
+  if (profileTab) profileTab.classList.remove("active");
 
   // Show target section
   const section = document.getElementById(`section-${sectionId}`);
   const navItem = document.getElementById(`nav-${sectionId}`);
   if (section) section.classList.add("active");
   if (navItem) navItem.classList.add("active");
+  if (sectionId === "profile" && profileTab) profileTab.classList.add("active");
 
   // Update topbar
   const titles = {
@@ -29,6 +32,12 @@ function switchSection(sectionId) {
   };
   document.getElementById("pageTitle").textContent = titles[sectionId] || sectionId;
   document.getElementById("breadcrumbSub").textContent = titles[sectionId] || sectionId;
+
+  // Auto-close mobile drawer when switching section
+  if (window.innerWidth <= 900 && typeof window.closeMobileSidebar === "function") {
+    window.closeMobileSidebar();
+  }
+  window.scrollTo({ top: 0, behavior: "instant" });
 
   // Section-specific init
   if (sectionId === "stats") { Charts.loadStats(); }
@@ -87,17 +96,24 @@ function renderCameraGrid(cameras) {
 
 function createCameraCard(cam) {
   const card = document.createElement("div");
-  card.className = "camera-card";
+  card.className = "camera-card" + (cam.is_active ? "" : " camera-offline");
   card.dataset.cameraId = cam.id;
   card.innerHTML = `
     <div class="camera-feed-wrap">
       ${cam.is_active
         ? `<img src="/stream/${cam.id}" alt="${cam.name}" loading="lazy" onerror="this.src='';this.alt='Feed unavailable'">`
-        : `<div style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:12px;background:#040c20;color:rgba(255,255,255,0.2)"><i class="fas fa-video-slash" style="font-size:2.5rem;opacity:0.3"></i><span style="font-size:0.82rem">Camera Offline</span></div>`
+        : `<div class="camera-offline-placeholder">
+             <i class="fas fa-video-slash offline-icon"></i>
+             <span class="offline-title">Camera Offline</span>
+             <span class="offline-badge">Sentinel Standby</span>
+           </div>`
       }
       <div class="camera-overlay">
         <span class="cam-id-badge">📹 ${cam.camera_uid}</span>
-        ${cam.is_active ? `<span class="rec-badge"><span class="rec-dot"></span>REC</span>` : ""}
+        ${cam.is_active
+          ? `<span class="rec-badge"><span class="rec-dot"></span>REC</span>`
+          : `<span class="offline-status-pill"><span class="offline-dot"></span>STANDBY</span>`
+        }
       </div>
     </div>
     <div class="camera-controls">
@@ -147,7 +163,12 @@ function renderExpandedCamera(cam) {
   if (cam.is_active) {
     container.innerHTML = `<img src="/stream/${cam.id}" alt="${cam.name}" onerror="this.src='';this.alt='Feed unavailable'">`;
   } else {
-    container.innerHTML = `<div style="color:rgba(255,255,255,0.2); text-align:center;"><i class="fas fa-video-slash" style="font-size:4rem; display:block; margin-bottom:15px;"></i>Camera Offline</div>`;
+    container.innerHTML = `
+      <div class="camera-offline-placeholder expanded-offline">
+        <i class="fas fa-video-slash offline-icon" style="font-size:3.5rem;margin-bottom:12px;"></i>
+        <span class="offline-title" style="font-size:1.1rem;font-weight:700;">Camera Offline</span>
+        <span class="offline-badge" style="margin-top:6px;">Sentinel Standby · Toggle switch to stream</span>
+      </div>`;
   }
 }
 
@@ -163,7 +184,7 @@ function renderThumbnails() {
       <div class="thumb-preview">
         ${cam.is_active 
           ? `<img src="/stream/${cam.id}" alt="${cam.name}" loading="lazy">`
-          : `<i class="fas fa-video-slash" style="opacity:0.2; margin:15px;"></i>`
+          : `<div class="camera-offline-placeholder thumb-offline" style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;"><i class="fas fa-video-slash offline-icon" style="font-size:1.1rem;"></i></div>`
         }
       </div>
       <div class="thumb-info">
@@ -335,7 +356,7 @@ function loadCameraManageTable() {
               <span class="toggle-slider"></span>
             </label>
           </td>
-          <td><span class="status-badge ${cam.is_active ? 'active' : 'inactive'}">${cam.is_active ? "🟢 Active" : "⚫ Offline"}</span></td>
+          <td><span class="status-badge ${cam.is_active ? 'active' : 'inactive'}">${cam.is_active ? "🟢 Active" : "📡 Standby (Offline)"}</span></td>
           <td>
             <button class="btn-sm btn-danger" onclick="deleteCamera(${cam.id}, '${cam.name}')"><i class="fas fa-trash"></i></button>
           </td>
@@ -528,6 +549,7 @@ function loadSettings() {
       applyFonts(fontLayout, sizeLayout, fontDash, sizeDash);
       // Also load verified email list when settings tab opens
       loadVerifiedEmailList();
+      if (typeof initCyberRangeSliders === "function") initCyberRangeSliders();
     });
 }
 
@@ -561,7 +583,7 @@ function saveAllSettings() {
   const getVal = id => document.getElementById(id)?.value;
   const conf = parseFloat(getVal("confThreshold") || "70") / 100;
   // Theme is controlled by the topbar toggle button only (Appearance card removed)
-  const theme = document.documentElement.getAttribute("data-theme") || "dark";
+  const theme = document.documentElement.getAttribute("data-theme") || "light";
 
   const payload = {
     email_alerts_enabled: getChecked("emailAlertToggle") ? "true" : "false",
@@ -612,7 +634,33 @@ document.getElementById("testAlertSettingsBtn")?.addEventListener("click", () =>
 document.getElementById("confThreshold")?.addEventListener("input", function() {
   const val = document.getElementById("confVal");
   if (val) val.textContent = this.value + "%";
+  const min = parseFloat(this.min || 0);
+  const max = parseFloat(this.max || 100);
+  const pct = ((this.value - min) / (max - min)) * 100;
+  this.style.setProperty("--vol-fill", pct + "%");
 });
+
+// ══════════════════════════════════════════════
+// CYBER RANGE SLIDERS (DYNAMIC TRACK FILL)
+// ══════════════════════════════════════════════
+function initCyberRangeSliders() {
+  document.querySelectorAll('input[type="range"]').forEach(slider => {
+    const updateFill = () => {
+      const min = parseFloat(slider.min || 0);
+      const max = parseFloat(slider.max || 100);
+      const val = parseFloat(slider.value || 0);
+      const pct = max > min ? ((val - min) / (max - min)) * 100 : 0;
+      slider.style.setProperty('--vol-fill', pct + '%');
+    };
+    if (!slider._cyberBound) {
+      slider.addEventListener('input', updateFill);
+      slider.addEventListener('change', updateFill);
+      slider._cyberBound = true;
+    }
+    updateFill();
+  });
+}
+document.addEventListener('DOMContentLoaded', initCyberRangeSliders);
 
 // ══════════════════════════════════════════════
 // USER MANAGEMENT
@@ -659,8 +707,9 @@ function deleteUser(userId, name) {
 // ══════════════════════════════════════════════
 function applyTheme(theme) {
   document.documentElement.setAttribute("data-theme", theme);
-  const icon = document.getElementById("themeIcon");
-  if (icon) icon.className = theme === "light" ? "fas fa-sun" : "fas fa-moon";
+  // Sync BB8 toggle: checked = dark (night), unchecked = light (day)
+  const cb = document.getElementById("bb8ThemeCheckbox");
+  if (cb) cb.checked = (theme === "dark");
 }
 
 function toggleExpand(element, containerId) {
@@ -683,9 +732,8 @@ function toggleExpand(element, containerId) {
   }
 }
 
-document.getElementById("themeToggleBtn")?.addEventListener("click", () => {
-  const current = document.documentElement.getAttribute("data-theme");
-  const next = current === "dark" ? "light" : "dark";
+document.getElementById("bb8ThemeCheckbox")?.addEventListener("change", (e) => {
+  const next = e.target.checked ? "dark" : "light";
   applyTheme(next);
   fetch("/api/settings", {
     method: "POST",
@@ -696,53 +744,156 @@ document.getElementById("themeToggleBtn")?.addEventListener("click", () => {
 
 
 // ── Theme Customization (Accent & Backgrounds) ──
+const DASHBOARD_THEME_PALETTES = {
+  obsidian: {
+    name: 'Obsidian Matrix',
+    themeMode: 'dark',
+    vars: {
+      '--dashboard-bg': '#0A0D0B',
+      '--bg-primary': '#0A0D0B',
+      '--bg-secondary': '#111613',
+      '--bg-card': 'rgba(16, 22, 18, 0.84)',
+      '--bg-card-hover': 'rgba(26, 35, 29, 0.94)',
+      '--bg-glass': 'rgba(12, 16, 13, 0.88)',
+      '--border': 'rgba(104, 157, 75, 0.24)',
+      '--border-glass': 'rgba(104, 157, 75, 0.32)',
+      '--card-shadow': '0 12px 36px -6px rgba(0, 0, 0, 0.65), 0 0 0 1px rgba(104, 157, 75, 0.12) inset'
+    }
+  },
+  navy: {
+    name: 'Cyber Midnight Navy',
+    themeMode: 'dark',
+    vars: {
+      '--dashboard-bg': '#070F1E',
+      '--bg-primary': '#070F1E',
+      '--bg-secondary': '#0D1B34',
+      '--bg-card': 'rgba(13, 27, 52, 0.84)',
+      '--bg-card-hover': 'rgba(20, 42, 80, 0.94)',
+      '--bg-glass': 'rgba(10, 20, 38, 0.88)',
+      '--border': 'rgba(56, 189, 248, 0.28)',
+      '--border-glass': 'rgba(56, 189, 248, 0.38)',
+      '--card-shadow': '0 12px 36px -6px rgba(3, 8, 20, 0.75), 0 0 0 1px rgba(56, 189, 248, 0.15) inset'
+    }
+  },
+  forest: {
+    name: 'Tactical Sentinel Green',
+    themeMode: 'dark',
+    vars: {
+      '--dashboard-bg': '#0E2013',
+      '--bg-primary': '#0E2013',
+      '--bg-secondary': '#17331F',
+      '--bg-card': 'rgba(20, 46, 27, 0.84)',
+      '--bg-card-hover': 'rgba(28, 62, 38, 0.94)',
+      '--bg-glass': 'rgba(14, 32, 19, 0.88)',
+      '--border': 'rgba(145, 174, 110, 0.30)',
+      '--border-glass': 'rgba(145, 174, 110, 0.40)',
+      '--card-shadow': '0 12px 36px -6px rgba(5, 16, 8, 0.65), 0 0 0 1px rgba(145, 174, 110, 0.16) inset'
+    }
+  },
+  light: {
+    name: 'Pearl Tactical Light',
+    themeMode: 'light',
+    vars: {
+      '--dashboard-bg': '#F2F4F2',
+      '--bg-primary': '#F2F4F2',
+      '--bg-secondary': '#E4ECE2',
+      '--bg-card': 'rgba(255, 255, 255, 0.94)',
+      '--bg-card-hover': '#FFFFFF',
+      '--bg-glass': 'rgba(242, 244, 242, 0.88)',
+      '--border': 'rgba(145, 174, 110, 0.38)',
+      '--border-glass': 'rgba(145, 174, 110, 0.45)',
+      '--card-shadow': '0 10px 30px -4px rgba(0, 0, 0, 0.08), 0 2px 10px rgba(104, 157, 75, 0.1)'
+    }
+  }
+};
+
+function applyDashboardTheme(themeKey) {
+  const root = document.documentElement;
+  
+  if (!themeKey || !DASHBOARD_THEME_PALETTES[themeKey]) {
+    // Reset to Sentinel Dark Default
+    root.style.removeProperty('--dashboard-bg');
+    root.style.removeProperty('--bg-primary');
+    root.style.removeProperty('--bg-secondary');
+    root.style.removeProperty('--bg-card');
+    root.style.removeProperty('--bg-card-hover');
+    root.style.removeProperty('--bg-glass');
+    root.style.removeProperty('--border');
+    root.style.removeProperty('--border-glass');
+    root.style.removeProperty('--card-shadow');
+    root.removeAttribute('data-dash-theme');
+    root.setAttribute('data-theme', 'dark');
+    localStorage.removeItem('ve_dash_theme_key');
+    localStorage.removeItem('dashboard_bg');
+    localStorage.removeItem('ve_dashboard_bg');
+    document.querySelectorAll('[data-target="dashboard"]').forEach(b => b.classList.remove('active-theme-swatch'));
+    return;
+  }
+
+  const palette = DASHBOARD_THEME_PALETTES[themeKey];
+  root.setAttribute('data-dash-theme', themeKey);
+  root.setAttribute('data-theme', palette.themeMode);
+  
+  Object.entries(palette.vars).forEach(([prop, val]) => {
+    root.style.setProperty(prop, val);
+  });
+
+  localStorage.setItem('ve_dash_theme_key', themeKey);
+  localStorage.setItem('dashboard_bg', palette.vars['--dashboard-bg']);
+  localStorage.setItem('ve_dashboard_bg', palette.vars['--dashboard-bg']);
+  localStorage.setItem('theme', palette.themeMode);
+
+  // Update active swatch indicator in the sidebar
+  document.querySelectorAll('[data-target="dashboard"]').forEach(b => {
+    if (b.dataset.themeKey === themeKey) {
+      b.classList.add('active-theme-swatch');
+    } else {
+      b.classList.remove('active-theme-swatch');
+    }
+  });
+}
+
 function initThemeCustomization() {
   document.querySelectorAll('.theme-color-btn').forEach(btn => {
     btn.addEventListener('click', () => {
       const target = btn.dataset.target;
       const color = btn.dataset.color;
+      const themeKey = btn.dataset.themeKey;
       
       if (btn.classList.contains('reset-theme')) {
         if (target === 'layout') {
           document.documentElement.style.removeProperty('--header-color');
           document.documentElement.style.removeProperty('--sidebar-color');
-          document.documentElement.style.removeProperty('--accent');
           localStorage.removeItem('header_color');
-          localStorage.removeItem('accent_color');
+          localStorage.removeItem('ve_header_color');
         } else {
-          document.documentElement.style.removeProperty('--dashboard-bg');
-          localStorage.removeItem('dashboard_bg');
+          applyDashboardTheme(null);
         }
         return;
       }
 
       if (target === 'layout') {
+        // Only set header/sidebar background — NEVER override --accent
         document.documentElement.style.setProperty('--header-color', color);
         document.documentElement.style.setProperty('--sidebar-color', color);
-        document.documentElement.style.setProperty('--accent', color);
         localStorage.setItem('header_color', color);
-        localStorage.setItem('accent_color', color);
+        localStorage.setItem('ve_header_color', color);
       } else {
-        document.documentElement.style.setProperty('--dashboard-bg', color);
-        localStorage.setItem('dashboard_bg', color);
+        applyDashboardTheme(themeKey);
       }
     });
   });
 
   // Load saved colors
-  const savedHeader = localStorage.getItem('header_color');
-  const savedDash = localStorage.getItem('dashboard_bg');
-  const savedAccent = localStorage.getItem('accent_color');
+  const savedHeader = localStorage.getItem('header_color') || localStorage.getItem('ve_header_color');
+  const savedThemeKey = localStorage.getItem('ve_dash_theme_key');
 
   if (savedHeader) {
     document.documentElement.style.setProperty('--header-color', savedHeader);
     document.documentElement.style.setProperty('--sidebar-color', savedHeader);
   }
-  if (savedDash) {
-    document.documentElement.style.setProperty('--dashboard-bg', savedDash);
-  }
-  if (savedAccent) {
-    document.documentElement.style.setProperty('--accent', savedAccent);
+  if (savedThemeKey) {
+    applyDashboardTheme(savedThemeKey);
   }
 }
 
@@ -910,11 +1061,110 @@ function loadTrainingHistory() {
 // ══════════════════════════════════════════════
 // SIDEBAR TOGGLE
 // ══════════════════════════════════════════════
-document.getElementById("sidebarToggle")?.addEventListener("click", () => {
+// Smooth Sidebar Toggle & Mobile Drawer Engine
+let _savedScrollPosition = 0;
+
+window.closeMobileSidebar = function() {
   const sidebar = document.getElementById("sidebar");
-  sidebar.classList.toggle("collapsed");
-  document.body.classList.toggle("sidebar-collapsed");
+  const overlay = document.getElementById("sidebarOverlay");
+  if (sidebar) sidebar.classList.remove("mobile-open");
+  if (overlay) overlay.classList.remove("active");
+
+  document.body.classList.remove("drawer-open-lock");
+  document.documentElement.classList.remove("drawer-open-lock");
+};
+
+window.openMobileSidebar = function() {
+  const sidebar = document.getElementById("sidebar");
+  const overlay = document.getElementById("sidebarOverlay");
+  if (!sidebar) return;
+
+  document.body.classList.add("drawer-open-lock");
+  document.documentElement.classList.add("drawer-open-lock");
+
+  sidebar.classList.add("mobile-open");
+  if (overlay) {
+    overlay.classList.add("active");
+    overlay.ontouchmove = function(e) { if (e.cancelable) e.preventDefault(); };
+  }
+};
+
+
+window.toggleSidebar = function(e) {
+  if (e && e.stopPropagation) e.stopPropagation();
+  const sidebar = document.getElementById("sidebar");
+  if (!sidebar) return;
+  if (window.innerWidth <= 900) {
+    const isOpen = sidebar.classList.contains("mobile-open");
+    if (isOpen) {
+      window.closeMobileSidebar();
+    } else {
+      window.openMobileSidebar();
+    }
+  } else {
+    sidebar.classList.toggle("collapsed");
+    document.body.classList.toggle("sidebar-collapsed");
+  }
+};
+
+// Bind toggle / close events
+document.getElementById("sidebarToggle")?.addEventListener("click", (e) => { e.stopPropagation(); toggleSidebar(e); });
+document.getElementById("sidebarCloseBtn")?.addEventListener("click", (e) => { e.stopPropagation(); closeMobileSidebar(); });
+document.getElementById("mobileMenuBtn")?.addEventListener("click", (e) => { e.stopPropagation(); toggleSidebar(e); });
+
+// Overlay tap dismiss & touch prevention
+const sbOverlay = document.getElementById("sidebarOverlay");
+if (sbOverlay) {
+  sbOverlay.addEventListener("click", () => { closeMobileSidebar(); });
+  sbOverlay.addEventListener("touchmove", (e) => { e.preventDefault(); }, { passive: false });
+}
+
+// Close drawer on any navigation item click in mobile
+document.querySelectorAll(".sidebar .nav-item").forEach(item => {
+  item.addEventListener("click", () => {
+    if (window.innerWidth <= 900) {
+      closeMobileSidebar();
+    }
+  });
 });
+
+document.getElementById("footerProfileBtn")?.addEventListener("click", (e) => {
+  e.preventDefault();
+  switchSection("profile");
+  if (window.innerWidth <= 900) {
+    closeMobileSidebar();
+  }
+});
+
+// Touch Swipe-to-Close gesture for Mobile Drawer
+(function initSidebarTouchSwipe() {
+  const sidebar = document.getElementById("sidebar");
+  if (!sidebar) return;
+  let startX = 0;
+  let startY = 0;
+
+  sidebar.addEventListener("touchstart", (e) => {
+    if (e.touches && e.touches.length > 0) {
+      startX = e.touches[0].clientX;
+      startY = e.touches[0].clientY;
+    }
+  }, { passive: true });
+
+  sidebar.addEventListener("touchend", (e) => {
+    if (!sidebar.classList.contains("mobile-open")) return;
+    if (e.changedTouches && e.changedTouches.length > 0) {
+      const endX = e.changedTouches[0].clientX;
+      const endY = e.changedTouches[0].clientY;
+      const diffX = endX - startX;
+      const diffY = endY - startY;
+
+      // Swiped left by > 45px and predominantly horizontal
+      if (diffX < -45 && Math.abs(diffX) > Math.abs(diffY)) {
+        closeMobileSidebar();
+      }
+    }
+  }, { passive: true });
+})();
 
 // ══════════════════════════════════════════════
 // CLOCK
@@ -929,21 +1179,72 @@ setInterval(updateClock, 1000);
 updateClock();
 
 // ══════════════════════════════════════════════
-// INLINE TOAST HELPER
+// AGENCY-GRADE CYBERNETIC TOAST NOTIFICATION
 // ══════════════════════════════════════════════
-function showInlineToast(message, type = "info") {
+function showInlineToast(message, type = "info", duration = 4200) {
   const container = document.getElementById("toastContainer");
   if (!container) return;
-  const icons = { success: "✅", error: "❌", info: "ℹ️" };
+
+  const typeNorm = (type || "info").toLowerCase();
+  const iconMap = {
+    success: "fas fa-check-circle",
+    error:   "fas fa-shield-virus",
+    warning: "fas fa-exclamation-triangle",
+    info:    "fas fa-info-circle"
+  };
+  const categoryMap = {
+    success: "System Confirmation",
+    error:   "Security Notice",
+    warning: "System Warning",
+    info:    "System Feed"
+  };
+
+  const iconClass = iconMap[typeNorm] || "fas fa-info-circle";
+  const category = categoryMap[typeNorm] || "Sentinel Update";
+
   const toast = document.createElement("div");
-  toast.className = `toast ${type === "error" ? "high" : "low"}`;
+  toast.className = `toast toast-${typeNorm} ${typeNorm === "error" ? "high" : typeNorm === "warning" ? "medium" : typeNorm === "success" ? "success" : "low"}`;
+  toast.setAttribute("role", "alert");
   toast.innerHTML = `
-    <div class="toast-icon">${icons[type] || "ℹ️"}</div>
-    <div><div class="toast-title">${message}</div></div>
-    <button class="toast-close" onclick="this.parentElement.remove()">✕</button>
+    <div class="toast-accent-bar"></div>
+    <div class="toast-icon-badge">
+      <i class="${iconClass}"></i>
+    </div>
+    <div class="toast-content">
+      <div class="toast-header-row">
+        <span class="toast-category">${category}</span>
+      </div>
+      <div class="toast-title">${message}</div>
+    </div>
+    <button class="toast-close" title="Dismiss notification" aria-label="Close">
+      <i class="fas fa-times"></i>
+    </button>
+    <div class="toast-progress" style="animation-duration: ${duration}ms;"></div>
   `;
+
+  function dismissToast() {
+    if (toast.classList.contains("dismissing")) return;
+    toast.classList.add("dismissing");
+    setTimeout(() => { if (toast.parentElement) toast.remove(); }, 350);
+  }
+
+  const closeBtn = toast.querySelector(".toast-close");
+  if (closeBtn) closeBtn.addEventListener("click", dismissToast);
+
   container.prepend(toast);
-  setTimeout(() => { if (toast.parentElement) toast.remove(); }, 4000);
+
+  let timer = setTimeout(dismissToast, duration);
+
+  toast.addEventListener("mouseenter", () => {
+    clearTimeout(timer);
+    const prog = toast.querySelector(".toast-progress");
+    if (prog) prog.style.animationPlayState = "paused";
+  });
+  toast.addEventListener("mouseleave", () => {
+    const prog = toast.querySelector(".toast-progress");
+    if (prog) prog.style.animationPlayState = "running";
+    timer = setTimeout(dismissToast, 1800);
+  });
 }
 
 // ══════════════════════════════════════════════
@@ -992,7 +1293,7 @@ document.addEventListener("DOMContentLoaded", () => {
   initThemeCustomization();
 
   // Apply saved theme
-  const currentTheme = document.documentElement.getAttribute("data-theme") || "dark";
+  const currentTheme = document.documentElement.getAttribute("data-theme") || "light";
   applyTheme(currentTheme);
 
   // Refresh cameras every 30s

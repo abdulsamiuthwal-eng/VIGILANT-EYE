@@ -3,11 +3,11 @@
 </p>
 
 <h1 align="center">👁️ VIGILANT EYE</h1>
-<h3 align="center">AI-Powered Real-Time Intelligent Surveillance & Theft Detection System</h3>
+<h3 align="center">Enterprise Real-Time AI Computer Vision Surveillance & Theft Prevention Platform</h3>
 
 <p align="center">
   <a href="https://vigilant-eye-gold.vercel.app" target="_blank">
-    <img src="https://img.shields.io/badge/🚀%20LIVE%20DEMO-Vercel%20Preview-000000?style=for-the-badge&logo=vercel&logoColor=white" alt="Live Demo on Vercel" height="38"/>
+    <img src="https://img.shields.io/badge/🚀%20LIVE%20DEMO-vigilant--eye--gold.vercel.app-0070F3?style=for-the-badge&logo=vercel&logoColor=white" alt="Live Demo on Vercel" height="38"/>
   </a>
 </p>
 
@@ -18,34 +18,44 @@
   <img src="https://img.shields.io/badge/OpenCV-Computer%20Vision-5c3ee8?style=flat-square&logo=opencv&logoColor=white" alt="OpenCV"/>
   <img src="https://img.shields.io/badge/Flask-Web%20Server-000000?style=flat-square&logo=flask&logoColor=white" alt="Flask"/>
   <img src="https://img.shields.io/badge/Socket.IO-Real--Time%20Events-010101?style=flat-square&logo=socketdotio&logoColor=white" alt="Socket.IO"/>
+  <img src="https://img.shields.io/badge/Three.js-WebGL%203D%20CCTV-black?style=flat-square&logo=threedotjs&logoColor=white" alt="Three.js"/>
   <img src="https://img.shields.io/badge/License-MIT-green?style=flat-square" alt="License"/>
 </p>
+
+---
+
+> 📘 **FOR NEW AI AGENTS & DEVELOPERS**:
+> Always read **[AGENT_GUIDE.md](AGENT_GUIDE.md)** and **[ARCHITECTURE.md](ARCHITECTURE.md)** first! They contain the complete architectural blueprints, dual-stack parity rules, sequence diagrams, database schemas, REST endpoints, WebSocket events, and critical gotchas for this repository.
 
 ---
 
 ## 📌 Table of Contents
 1. [Project Overview](#-project-overview)
 2. [🌐 Live Web Demo (Vercel)](#-live-web-demo-vercel)
-3. [Key Features](#-key-features)
-4. [System Architecture](#-system-architecture)
-5. [Tech Stack](#-tech-stack)
-6. [📧 Email Alert Configuration (SMTP) — CRITICAL](#-email-alert-configuration-smtp--step-by-step)
-7. [Installation & Local Setup](#-installation--local-setup)
-8. [Project Structure](#-project-structure)
-9. [Security & Best Practices](#-security--best-practices)
-10. [License](#-license)
+3. [✨ Key Features](#-key-features)
+4. [🏗️ Dual-Stack Architecture](#️-dual-stack-architecture)
+5. [🎨 Design System & Color Tokens](#-design-system--color-tokens)
+6. [🛠️ Tech Stack](#️-tech-stack)
+7. [📧 Email Alert Configuration (SMTP) — Step-by-Step](#-email-alert-configuration-smtp--step-by-step)
+8. [🚀 Installation & Local Setup](#-installation--local-setup)
+9. [📁 Project Structure](#-project-structure)
+10. [🔑 Default Credentials](#-default-credentials)
+11. [🔒 Security & Best Practices](#-security--best-practices)
+12. [📄 License](#-license)
 
 ---
 
 ## 📖 Project Overview
 
-**Vigilant Eye** is an enterprise-grade, real-time AI computer vision surveillance platform designed for retail stores, warehouses, and restricted security zones. Leveraging **YOLOv8** deep learning object detection, **SORT** spatial tracking, and **Flask-SocketIO**, Vigilant Eye monitors multi-camera feeds concurrently, identifies suspicious behaviors (theft actions, shoplifting, prolonged dwell in sensitive areas, unauthorized boundary crossing), and dispatches millisecond multi-channel security alerts.
+**Vigilant Eye** is an enterprise-grade AI computer vision surveillance and anti-theft security platform built for retail environments, supermarkets, warehouses, and secured industrial zones.
+
+By combining **YOLOv8 deep learning detection**, **SORT spatial tracking**, **smart zone collision logic**, and **Flask-SocketIO**, Vigilant Eye continuously monitors concurrent video streams, detects persons, tracks dwell time in sensitive areas, flags suspicious item-concealment actions, and dispatches instant multi-channel security alerts (WebSocket audio siren, Gmail snapshot reports, and FCM push notifications).
 
 ---
 
 ## 🌐 Live Web Demo (Vercel)
 
-Experience the frontend dashboard and in-browser camera detection right now without installing any local Python environment:
+Experience the modern dashboard interface and in-browser camera detection right now without installing any local Python environment:
 
 <p align="center">
   <a href="https://vigilant-eye-gold.vercel.app" target="_blank">
@@ -53,25 +63,77 @@ Experience the frontend dashboard and in-browser camera detection right now with
   </a>
 </p>
 
-> 💡 **Client-Side Demo Note**:
-> The Vercel deployment runs as an autonomous client-side web application powered by **TensorFlow.js (COCO-SSD)**. It accesses your local webcam securely in the browser via `getUserMedia` and simulates real-time detections, alerts, and analytics using client-side `localStorage`. For full high-precision YOLOv8 PyTorch CUDA inference and background model retraining, run the desktop Flask server locally.
+> 💡 **Client-Side Demo Mode**:
+> The live deployment on Vercel runs autonomously via **TensorFlow.js (COCO-SSD)**. It accesses your local webcam securely in the browser via `navigator.mediaDevices.getUserMedia` and simulates detections, analytics, and security events stored in browser `localStorage`. For full PyTorch CUDA inference, RTSP streams, and background model fine-tuning, run the Flask backend locally.
 
 ---
 
 ## ✨ Key Features
 
-* 🎯 **Real-Time YOLOv8 Detection**: High-accuracy detection of persons, suspicious hand-to-pocket motions, and shoplifting actions at ~30 FPS.
-* 📍 **Dynamic Smart Zones**:
-  * **Zone A (Shelf)**: Tracks dwell time and item pickup behaviors.
-  * **Zone B (Checkout Counter)**: Validates scanning and item clearance.
-  * **Zone C (Exit Zone)**: Flags individuals bypassing checkout.
-* 📹 **Multi-Camera Management**: Thread-safe manager supporting USB webcams, RTSP IP camera streams, and video files with automatic reconnection.
-* ⚡ **Instant Multi-Channel Alerts**:
-  * Real-time WebSocket audio/visual alarms on the dashboard.
-  * Automated high-priority email alerts with snapshot attachments via Gmail SMTP.
-  * Mobile push alerts via Firebase Cloud Messaging (FCM).
-* 🔄 **On-Premise Model Fine-Tuning**: Upload surveillance recordings, auto-extract video frames, and retrain custom YOLO weights directly from the browser UI.
-* 🔐 **Secure Authentication**: Flask-Login, Bcrypt password encryption, Google OAuth support, and multi-email OTP verification.
+* 🎥 **Photorealistic 3D CCTV Camera (Three.js WebGL)**: Hardware-accurate 3D security camera with procedural brushed metal, optical glass shaders, 12 infrared night-vision LEDs, volumetric laser cone, and servomotor input/cursor tracking on the login page.
+* 🎨 **Curated 4-Color Glassmorphic Design**: Strict anti-theft theme built on calibrated tokens (`#D96868`, `#F2F2F2`, `#91AE6E`, `#689D4B`) with hardware-accelerated blur, volumetric ambient background blending, and high-contrast typography.
+* 🎯 **Real-Time YOLOv8 Detection**: Sub-30ms inference detecting persons, suspicious dwell times, and potential theft actions.
+* 📍 **Multi-Zone Spatial Logic**:
+  * **Zone A (Shelf / Merchandising)**: Measures dwell time and shelf-approach frequency.
+  * **Zone B (Checkout / Register)**: Validates payment and scanning clearance.
+  * **Zone C (Store Exit Perimeter)**: Immediately triggers alarms if an individual bypasses Zone B directly from Zone A.
+* 📹 **Thread-Safe Camera Management**: Concurrent capture supporting RTSP IP cameras, USB webcams, and video files with automatic reconnection.
+* ⚡ **Multi-Channel Alert Dispatcher**:
+  * Real-time WebSocket audio siren and visual HUD flashing.
+  * Multi-recipient Gmail SMTP alert emails with camera snapshots.
+  * Independent OTP verification for every email added to the alert list.
+  * Firebase Cloud Messaging (FCM) mobile push alerts.
+* 🔄 **On-Premise Model Fine-Tuning**: Web-based upload of surveillance footage, automatic frame extraction at configurable FPS, and background retraining of custom YOLOv8 weights with live progress bars.
+* 📱 **Fluid 60 FPS Mobile Drawer**: Hardware-accelerated GPU slide drawer (`translate3d`), reflow-decoupled dismissal, zero scrollbar clutter, and standardized compact profile controls on mobile viewports.
+* 🔐 **Secure Authentication**: Flask-Login, Bcrypt password hashing, session-bound themes, and Google OAuth 2.0 integration.
+
+---
+
+## 🏗️ Dual-Stack Architecture
+
+```
+┌─────────────────────────────────────────────────────────────────────────────┐
+│                             VIGILANT EYE SYSTEM                             │
+└──────────────────────────────────────┬──────────────────────────────────────┘
+                                       │
+            ┌──────────────────────────┴──────────────────────────┐
+            ▼                                                     ▼
+┌───────────────────────────────┐             ┌───────────────────────────────┐
+│   Python Flask Backend (/)   │             │   Vercel Webapp (/vercel_demo)│
+├───────────────────────────────┤             ├───────────────────────────────┤
+│ • PyTorch YOLOv8 + OpenCV     │             │ • TensorFlow.js (COCO-SSD)    │
+│ • SORT Kalman Filter Tracking │             │ • In-browser webcam stream    │
+│ • SQLite Database (`db`)      │             │ • Client `localStorage` mock  │
+│ • Multi-Camera RTSP Engine    │             │ • Static HTML5 / CSS3 / JS    │
+│ • Flask-SocketIO & SMTPLib    │             │ • Deployed at Vercel Edge     │
+└───────────────────────────────┘             └───────────────────────────────┘
+```
+
+---
+
+## 🎨 Design System & Color Tokens
+
+The UI strictly adheres to a calibrated 4-color palette designed for maximum contrast and security readability:
+
+| Color Token | Hex Code | Role in Interface |
+| :--- | :--- | :--- |
+| **Coral Red** | `#D96868` | Primary brand accent, alert badges, laser target locks, critical alarm triggers |
+| **Light Neutral** | `#F2F2F2` | Clean background canvas, light mode base, high-contrast text |
+| **Sage Green** | `#91AE6E` | Secondary accent, tactical HUD borders, searching reticle, status badges |
+| **Olive Forest** | `#689D4B` | Tertiary dark accent, active online indicators, button hover states |
+
+---
+
+## 🛠️ Tech Stack
+
+| Layer | Technologies |
+| :--- | :--- |
+| **Backend** | Python 3.10+, Flask 3.0, Flask-SocketIO, Flask-Login, Flask-Bcrypt, SQLAlchemy |
+| **Computer Vision** | Ultralytics YOLOv8, PyTorch (CUDA 12.x), OpenCV (`cv2`), Scipy, NumPy |
+| **Object Tracking** | SORT (Simple Online and Realtime Tracking) with Kalman Filtering |
+| **Frontend UI** | HTML5, Vanilla CSS Glassmorphism, Three.js (WebGL), Chart.js, Socket.IO Client |
+| **Alerting** | Python `smtplib` (Gmail SMTP), Brevo API, Firebase Cloud Messaging (FCM) |
+| **Static Demo** | Vercel Edge Serverless, TensorFlow.js, `@tensorflow-models/coco-ssd` |
 
 ---
 
@@ -82,12 +144,6 @@ Experience the frontend dashboard and in-browser camera detection right now with
 
 ### 🔑 How to Generate a Google App Password
 
-Follow these exact steps to obtain your 16-character SMTP passcode:
-
-```
-Google Account ➔ Security ➔ 2-Step Verification ➔ App Passwords ➔ Generate 16-Digit Key
-```
-
 1. Open your **[Google Account Management](https://myaccount.google.com/)**.
 2. On the left navigation panel, click **Security**.
 3. Under *"How you sign in to Google"*, ensure **2-Step Verification** is turned **ON**.
@@ -97,56 +153,21 @@ Google Account ➔ Security ➔ 2-Step Verification ➔ App Passwords ➔ Genera
 7. Google will display a **16-character passcode** (e.g., `abcd efgh ijkl mnop`).
 8. **Copy this 16-character code** (spaces don't matter).
 
----
-
 ### ⚙️ How to Add Credentials to Vigilant Eye
 
-You have two simple ways to configure your credentials:
-
-#### Option A: Using `.env` File (Recommended — Keeps Credentials Safe)
-1. In the project root folder, copy `.env.example` to `.env`:
-   ```bash
-   cp .env.example .env
-   ```
-2. Open `.env` in any text editor and fill in your details:
-   ```env
-   EMAIL_ENABLED=True
-   SENDER_EMAIL=your_gmail_address@gmail.com
-   SENDER_PASSWORD=abcd efgh ijkl mnop
-   RECIPIENT_EMAIL=alert_destination@gmail.com
-   SMTP_HOST=smtp.gmail.com
-   SMTP_PORT=587
-   ```
-
-#### Option B: Editing `config.py` Directly
-Open `config.py` and update lines 44–51:
-```python
-EMAIL_CONFIG = {
-    "enabled": True,
-    "sender_email": "your_gmail_address@gmail.com",       # << Your Gmail address
-    "sender_password": "abcd efgh ijkl mnop",             # << Your 16-digit Google App Password
-    "recipient_email": "alert_destination@gmail.com",     # << Target email for alert notifications
-    "smtp_host": "smtp.gmail.com",
-    "smtp_port": 587,
-}
+Create a `.env` file in the project root:
+```bash
+cp .env.example .env
 ```
-
-> [!WARNING]
-> **SECURITY NOTICE**: Never commit your actual App Password or `.env` file to a public GitHub repository. Ensure `.env` is listed in your `.gitignore` at all times.
-
----
-
-## 🛠️ Tech Stack
-
-| Domain | Technologies |
-| :--- | :--- |
-| **Backend Framework** | Python 3.10+, Flask 3.0, Flask-SocketIO, Flask-Login, Flask-Bcrypt |
-| **AI & Computer Vision** | Ultralytics YOLOv8, PyTorch, TorchVision (CUDA 12.x), OpenCV (`cv2`) |
-| **Object Tracking** | SORT (Simple Online and Realtime Tracking), Kalman Filter, SciPy |
-| **Database & ORM** | SQLite, SQLAlchemy ORM |
-| **Notification Engine** | Secure SMTPLib (Gmail), Brevo API, Firebase Cloud Messaging (FCM) |
-| **Frontend & Visualization** | HTML5, Modern CSS Glassmorphism, Chart.js, Socket.IO Client |
-| **Cloud Web Demo** | Vercel Serverless Hosting, TensorFlow.js, COCO-SSD |
+Fill in your details in `.env`:
+```env
+EMAIL_ENABLED=True
+SENDER_EMAIL=your_gmail_address@gmail.com
+SENDER_PASSWORD=abcd efgh ijkl mnop
+RECIPIENT_EMAIL=alert_destination@gmail.com
+SMTP_HOST=smtp.gmail.com
+SMTP_PORT=587
+```
 
 ---
 
@@ -158,9 +179,9 @@ git clone https://github.com/abdulsamiuthwal-eng/VIGILANT-EYE.git
 cd VIGILANT-EYE
 ```
 
-### 2. Create and Activate a Virtual Environment
+### 2. Create and Activate Virtual Environment
 ```bash
-# Windows
+# Windows (PowerShell)
 python -m venv venv
 venv\Scripts\activate
 
@@ -171,22 +192,21 @@ source venv/bin/activate
 
 ### 3. Install PyTorch with CUDA (Optional for GPU Acceleration)
 ```bash
-# For NVIDIA GPU (CUDA 12.1 / 12.8)
+# For NVIDIA GPU acceleration
 pip install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cu128
 ```
 
-### 4. Install Project Dependencies
+### 4. Install Dependencies
 ```bash
 pip install -r requirements.txt
 ```
 
-### 5. Initialize the Database
+### 5. Initialize Database & Default Admin
 ```bash
 python init_db.py
 ```
-> Default operator account created: `admin@vigilanteye.com` / `password123`
 
-### 6. Run Vigilant Eye
+### 6. Run Vigilant Eye Server
 ```bash
 python app.py
 ```
@@ -199,28 +219,36 @@ Open your browser and navigate to: **`http://localhost:5000`**
 ```text
 VIGILANT-EYE/
 ├── app.py                      # Flask & SocketIO application server
-├── config.py                   # Centralized configuration & AI parameters
+├── config.py                   # Central configuration & parameters
 ├── init_db.py                  # Database bootstrapper & default admin generator
-├── requirements.txt            # Python dependencies
-├── .env.example                # Environment variables template
+├── AGENT_GUIDE.md              # Master developer & AI agent architectural guide
 ├── auth/                       # Authentication blueprint & security routes
 ├── camera/                     # Video capture & multi-camera stream manager
 ├── detection/                  # YOLOv8 detector & SORT tracking algorithms
 ├── alerts/                     # Dispatcher for Email, FCM & Socket alarms
 ├── database/                   # SQLAlchemy ORM models & database manager
 ├── training/                   # Video frame extractor & YOLO fine-tuning pipeline
-├── static/                     # CSS stylesheets, UI scripts, sound effects
+├── static/                     # CSS stylesheets, UI scripts, 3D assets, sound effects
 ├── templates/                  # Jinja2 dashboard & auth views
 └── vercel_demo/                # Autonomous client-side webapp deployed on Vercel
 ```
 
 ---
 
+## 🔑 Default Credentials
+
+| Environment | URL | Email | Password |
+| :--- | :--- | :--- | :--- |
+| **Local Flask Server** | `http://localhost:5000` | `admin@vigilanteye.com` | `password123` |
+| **Vercel Live Demo** | `https://vigilant-eye-gold.vercel.app` | `admin@vigilanteye.com` | `admin123` |
+
+---
+
 ## 🔒 Security & Best Practices
 
-* **Sensitive Data Isolation**: All sensitive credentials are decoupled into environment variables via `.env`.
-* **Zero Accidental Leaks**: SQLite databases, personal webcam snapshots, and environment secrets are excluded via `.gitignore`.
-* **Fail-Safe Fallbacks**: System automatically falls back from GPU to CPU, and from fine-tuned models to base YOLOv8n if custom weights are not present.
+* **Sensitive Data Isolation**: All API keys, SMTP passwords, and tokens are stored in `.env`.
+* **Safe Defaults**: Cameras default to inactive on startup to prevent accidental stream leaks.
+* **Fail-Safe Fallbacks**: Automatic fallback from GPU to CPU, and from custom weights to baseline YOLOv8n.
 
 ---
 

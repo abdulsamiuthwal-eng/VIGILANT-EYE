@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en" data-theme="{{ theme or 'dark' }}">
+<html lang="en" data-theme="{{ theme or 'light' }}">
 
 <head>
   <meta charset="UTF-8">
@@ -32,40 +32,122 @@
 
 <body>
 
-  <!-- ════════════ PAGE LOADER (prevents blank-screen flash) ════════════ -->
-  <div id="ve-page-loader" style="
-    position:fixed;inset:0;z-index:99999;
-    background:var(--bg-primary,#0d1a35);
-    display:flex;align-items:center;justify-content:center;
-    opacity:1;transition:opacity 0.35s ease;pointer-events:all;
-    will-change:opacity;
-  ">
-    <div style="display:flex;flex-direction:column;align-items:center;gap:16px;">
-      <div style="
-        width:44px;height:44px;border-radius:50%;
-        border:3px solid rgba(113,201,206,0.15);
-        border-top-color:#71C9CE;
-        animation:ve-loader-spin 0.7s linear infinite;
-        will-change:transform;
-      "></div>
-      <div style="font-size:0.75rem;color:rgba(203,241,245,0.45);letter-spacing:2px;text-transform:uppercase;font-family:'Outfit',sans-serif;">
-        Loading Dashboard...
+  <!-- ════════════════ GLOBAL PAGE-LOAD SKELETON ════════════════
+       Visible instantly on hard reload (Ctrl+Shift+R).
+       Removed by ux_enhancer.js once the dashboard is ready.
+  ─────────────────────────────────────────────────────────────── -->
+  <div id="ve-global-loader" aria-hidden="true">
+    <!-- Fake sidebar -->
+    <div class="ve-gl-sidebar">
+      <div class="ve-gl-logo">
+        <div class="ve-gl-logo-icon ve-gl-shimmer"></div>
+        <div class="ve-gl-logo-text">
+          <div class="ve-gl-shimmer" style="height:13px;width:110px;border-radius:6px;"></div>
+          <div class="ve-gl-shimmer" style="height:10px;width:80px;border-radius:5px;"></div>
+        </div>
+      </div>
+      <div class="ve-gl-divider"></div>
+      <div class="ve-gl-nav-item ve-gl-shimmer"></div>
+      <div class="ve-gl-nav-item ve-gl-shimmer"></div>
+      <div class="ve-gl-nav-item ve-gl-shimmer"></div>
+      <div class="ve-gl-nav-item ve-gl-shimmer"></div>
+      <div class="ve-gl-nav-item ve-gl-shimmer"></div>
+      <div class="ve-gl-nav-item ve-gl-shimmer"></div>
+      <div class="ve-gl-divider"></div>
+      <div class="ve-gl-nav-item ve-gl-shimmer" style="margin-top:auto;width:70%;"></div>
+    </div>
+    <!-- Fake main area -->
+    <div class="ve-gl-main">
+      <!-- Fake topbar -->
+      <div class="ve-gl-topbar">
+        <div class="ve-gl-topbar-title ve-gl-shimmer"></div>
+        <div class="ve-gl-topbar-spacer"></div>
+        <div class="ve-gl-topbar-pill ve-gl-shimmer" style="width:80px;"></div>
+        <div class="ve-gl-topbar-pill ve-gl-shimmer" style="width:36px;"></div>
+        <div class="ve-gl-topbar-pill ve-gl-shimmer" style="width:36px;"></div>
+        <div class="ve-gl-topbar-pill ve-gl-shimmer" style="width:90px;border-radius:50px;"></div>
+      </div>
+      <!-- Fake content -->
+      <div class="ve-gl-content">
+        <!-- Stat cards row -->
+        <div class="ve-gl-stat-row">
+          <div class="ve-gl-stat-card ve-gl-shimmer"></div>
+          <div class="ve-gl-stat-card ve-gl-shimmer"></div>
+          <div class="ve-gl-stat-card ve-gl-shimmer"></div>
+          <div class="ve-gl-stat-card ve-gl-shimmer"></div>
+        </div>
+        <!-- Camera card grid -->
+        <div class="ve-gl-camera-row">
+          <div class="ve-gl-cam-card ve-gl-shimmer"></div>
+          <div class="ve-gl-cam-card ve-gl-shimmer"></div>
+          <div class="ve-gl-cam-card ve-gl-shimmer"></div>
+          <div class="ve-gl-cam-card ve-gl-shimmer"></div>
+          <div class="ve-gl-cam-card ve-gl-shimmer"></div>
+          <div class="ve-gl-cam-card ve-gl-shimmer"></div>
+        </div>
       </div>
     </div>
-    <style>@keyframes ve-loader-spin{to{transform:rotate(360deg);}}</style>
+    <!-- Bottom status label -->
+    <div class="ve-gl-label">
+      <div class="ve-gl-label-dot"></div>
+      Initializing Vigilant Eye
+    </div>
   </div>
 
   <!-- ════════════════ SIDEBAR ════════════════ -->
   <aside class="sidebar" id="sidebar">
     <div class="sidebar-header">
       <div class="sidebar-logo">
-        <div class="logo-eye">👁</div>
+        <div class="logo-eye" title="Vigilant Eye AI Sentinel">
+          <svg class="vigilant-eye-svg" viewBox="0 0 44 44" width="34" height="34" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <defs>
+              <linearGradient id="veLensGrad" x1="4" y1="4" x2="40" y2="40" gradientUnits="userSpaceOnUse">
+                <stop offset="0%" stop-color="#D96868"/>
+                <stop offset="50%" stop-color="#91AE6E"/>
+                <stop offset="100%" stop-color="#689D4B"/>
+              </linearGradient>
+              <linearGradient id="veIrisGrad" x1="14" y1="14" x2="30" y2="30" gradientUnits="userSpaceOnUse">
+                <stop offset="0%" stop-color="#D96868"/>
+                <stop offset="100%" stop-color="#689D4B"/>
+              </linearGradient>
+              <radialGradient id="vePupilGlow" cx="22" cy="22" r="5" gradientUnits="userSpaceOnUse">
+                <stop offset="0%" stop-color="#FFFFFF"/>
+                <stop offset="50%" stop-color="#D96868"/>
+                <stop offset="100%" stop-color="#181C19"/>
+              </radialGradient>
+            </defs>
+            <!-- 100% Centered Outer Tactical Circle -->
+            <circle cx="22" cy="22" r="18" stroke="url(#veLensGrad)" stroke-width="1.6" opacity="0.45"/>
+            <!-- 4 Symmetrical Targeting Crosshairs -->
+            <line x1="22" y1="2" x2="22" y2="6.5" stroke="#91AE6E" stroke-width="1.8" stroke-linecap="round"/>
+            <line x1="22" y1="37.5" x2="22" y2="42" stroke="#91AE6E" stroke-width="1.8" stroke-linecap="round"/>
+            <line x1="2" y1="22" x2="6.5" y2="22" stroke="#91AE6E" stroke-width="1.8" stroke-linecap="round"/>
+            <line x1="37.5" y1="22" x2="42" y2="22" stroke="#91AE6E" stroke-width="1.8" stroke-linecap="round"/>
+            <!-- Perfectly Centered Surveillance Eyelid Contour -->
+            <path d="M6.5 22C11 14.5 16.5 11 22 11C27.5 11 33 14.5 37.5 22C33 29.5 27.5 33 22 33C16.5 33 11 29.5 6.5 22Z" 
+                  stroke="url(#veLensGrad)" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/>
+            <!-- Concentric Iris -->
+            <circle cx="22" cy="22" r="7.5" stroke="url(#veIrisGrad)" stroke-width="1.8" fill="rgba(217, 104, 104, 0.12)"/>
+            <!-- Centered Core Aperture Ring -->
+            <circle cx="22" cy="22" r="4.8" stroke="#91AE6E" stroke-width="1.2" stroke-dasharray="3 2" opacity="0.85"/>
+            <!-- Glowing Core Pupil -->
+            <circle cx="22" cy="22" r="3.2" fill="url(#vePupilGlow)"/>
+            <circle cx="22" cy="22" r="1.3" fill="#FFFFFF"/>
+          </svg>
+        </div>
         <div>
           <div class="logo-name">VIGILANT EYE</div>
           <div class="logo-sub">Surveillance System</div>
         </div>
       </div>
-      <button class="sidebar-toggle" id="sidebarToggle"><i class="fas fa-bars"></i></button>
+      <!-- Desktop sidebar toggle (collapse) -->
+      <button class="sidebar-toggle desktop-toggle" id="sidebarToggle" title="Toggle Sidebar" aria-label="Toggle Sidebar">
+        <i class="fas fa-bars"></i>
+      </button>
+      <!-- Mobile sidebar close button (ONLY shown on mobile drawer) -->
+      <button class="sidebar-close-btn mobile-close" id="sidebarCloseBtn" title="Close Navigation" aria-label="Close Sidebar">
+        <i class="fas fa-times"></i>
+      </button>
     </div>
 
     <nav class="sidebar-nav">
@@ -100,35 +182,34 @@
           style="float: right; transition: transform 0.3s; margin-top: 2px;"></i>
       </div>
       <div class="theme-customization-module" id="themeCustPanel" style="display: none; padding: 10px;">
-        <!-- Header & Sidebar Colors -->
-        <div style="color: rgba(255,255,255,0.7); font-size: 0.85rem; font-weight: 500; margin-bottom: 8px;">Header & Sidebar</div>
+        <!-- Header & Sidebar Colors — PALETTE ONLY -->
+        <div style="color: var(--text-secondary); font-size: 0.82rem; font-weight: 600; margin-bottom: 8px; letter-spacing: 0.5px;">Header &amp; Sidebar</div>
         <div class="theme-color-grid" style="margin-bottom: 15px;">
-          <button class="theme-color-btn" style="background: #0078ff;" data-target="layout" data-color="#0078ff" title="Blue"></button>
-          <button class="theme-color-btn" style="background: #00cc66;" data-target="layout" data-color="#00cc66" title="Green"></button>
-          <button class="theme-color-btn" style="background: #ff3b3b;" data-target="layout" data-color="#ff3b3b" title="Red"></button>
-          <button class="theme-color-btn" style="background: #9d50bb;" data-target="layout" data-color="#9d50bb" title="Purple"></button>
-          <button class="theme-color-btn" style="background: #ff8800;" data-target="layout" data-color="#ff8800" title="Orange"></button>
-          <button class="theme-color-btn" style="background: #333333;" data-target="layout" data-color="#333333" title="Dark Gray"></button>
-          <button class="theme-color-btn" style="background: #008080;" data-target="layout" data-color="#008080" title="Teal"></button>
-          <button class="theme-color-btn" style="background: #000000;" data-target="layout" data-color="#000000" title="Black"></button>
+          <button class="theme-color-btn" style="background: #D96868;" data-target="layout" data-color="#D96868" title="Coral"></button>
+          <button class="theme-color-btn" style="background: #91AE6E;" data-target="layout" data-color="#91AE6E" title="Sage"></button>
+          <button class="theme-color-btn" style="background: #689D4B;" data-target="layout" data-color="#689D4B" title="Forest"></button>
+          <button class="theme-color-btn" style="background: #181C19; border: 1px solid #91AE6E;" data-target="layout" data-color="#181C19" title="Dark"></button>
           <button class="theme-color-btn reset-theme" data-target="layout" title="Reset Default"><i class="fas fa-undo"></i></button>
         </div>
 
-        <!-- Dashboard Theme Colors -->
-        <div style="color: rgba(255,255,255,0.7); font-size: 0.85rem; font-weight: 500; margin-bottom: 8px;">Dashboard Theme</div>
+        <!-- Dashboard Theme Colors — PALETTE ONLY -->
+        <div style="color: var(--text-secondary); font-size: 0.82rem; font-weight: 600; margin-bottom: 8px; letter-spacing: 0.5px;">Dashboard Theme</div>
         <div class="theme-color-grid">
-          <button class="theme-color-btn" style="background: #ffe30c;" data-target="dashboard" data-color="#0d1117" title="Deep Dark"></button>
-          <button class="theme-color-btn" style="background: #1e1e2e;" data-target="dashboard" data-color="#1e1e2e" title="Catppuccin Macchiato"></button>
-          <button class="theme-color-btn" style="background: #282a36;" data-target="dashboard" data-color="#282a36" title="Dracula"></button>
-          <button class="theme-color-btn" style="background: #111827;" data-target="dashboard" data-color="#111827" title="Tailwind Gray"></button>
-          <button class="theme-color-btn" style="background: #171923;" data-target="dashboard" data-color="#171923" title="Chakra UI Dark"></button>
-          <button class="theme-color-btn" style="background: #242424;" data-target="dashboard" data-color="#242424" title="Vue Dark"></button>
-          <button class="theme-color-btn" style="background: #1a1a1a;" data-target="dashboard" data-color="#1a1a1a" title="Vite Dark"></button>
-          <button class="theme-color-btn" style="background: #0f172a;" data-target="dashboard" data-color="#0f172a" title="Slate"></button>
-          <button class="theme-color-btn reset-theme" data-target="dashboard" title="Reset Default"><i class="fas fa-undo"></i></button>
+          <button class="theme-color-btn" style="background: #0C100E; border: 2px solid #689D4B;" data-target="dashboard" data-theme-key="obsidian" data-color="#0C100E" title="Obsidian Matrix (Carbon Black)"></button>
+          <button class="theme-color-btn" style="background: #0A192F; border: 2px solid #38BDF8;" data-target="dashboard" data-theme-key="navy" data-color="#0A192F" title="Cyber Midnight Navy (High-Tech Blue)"></button>
+          <button class="theme-color-btn" style="background: #142E1B; border: 2px solid #91AE6E;" data-target="dashboard" data-theme-key="forest" data-color="#142E1B" title="Tactical Sentinel Green (Military Forest)"></button>
+          <button class="theme-color-btn" style="background: #F4F6F4; border: 2px solid #91AE6E;" data-target="dashboard" data-theme-key="light" data-color="#F4F6F4" title="Pearl Tactical Light"></button>
+          <button class="theme-color-btn reset-theme" data-target="dashboard" title="Reset Default (Sentinel Dark)"><i class="fas fa-undo"></i></button>
         </div>
       </div>
       
+      <!-- Sidebar System Telemetry Badge -->
+      <div class="sidebar-telemetry">
+        <span class="telemetry-dot"></span>
+        <span class="telemetry-text">SENTINEL AI ACTIVE</span>
+        <span class="telemetry-version">v2.4</span>
+      </div>
+
       <script>
         // Local UI state
         let themeOpen = false;
@@ -150,26 +231,57 @@
       </script>
     </nav>
 
-    <div class="sidebar-footer">
-      <div class="user-info">
-        <div class="avatar">{{ user.name[0].upper() }}</div>
+    <div class="sidebar-footer" id="sidebarFooter">
+      <div class="user-info" id="footerProfileBtn" onclick="switchSection('profile')" title="My Profile" style="cursor: pointer;">
+        <div class="avatar" title="System Operator Profile">
+          <svg class="operator-avatar-svg" viewBox="0 0 32 32" width="22" height="22" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <defs>
+              <linearGradient id="opHeadGrad" x1="8" y1="4" x2="24" y2="16" gradientUnits="userSpaceOnUse">
+                <stop offset="0%" stop-color="#FFFFFF"/>
+                <stop offset="50%" stop-color="#91AE6E"/>
+                <stop offset="100%" stop-color="#689D4B"/>
+              </linearGradient>
+              <linearGradient id="opShieldGrad" x1="18" y1="16" x2="28" y2="28" gradientUnits="userSpaceOnUse">
+                <stop offset="0%" stop-color="#D96868"/>
+                <stop offset="100%" stop-color="#91AE6E"/>
+              </linearGradient>
+              <filter id="opGlow" x="-20%" y="-20%" width="140%" height="140%">
+                <feDropShadow dx="0" dy="0" stdDeviation="1.5" flood-color="#91AE6E" flood-opacity="0.5"/>
+              </filter>
+            </defs>
+            <circle cx="16" cy="9.5" r="5.5" stroke="url(#opHeadGrad)" stroke-width="1.8" fill="rgba(145, 174, 110, 0.18)" filter="url(#opGlow)"/>
+            <path d="M13 9.5H19" stroke="#FFFFFF" stroke-width="1.5" stroke-linecap="round"/>
+            <path d="M6 26C6 21 10.5 17.5 16 17.5C21.5 17.5 26 21 26 26" stroke="url(#opHeadGrad)" stroke-width="1.8" stroke-linecap="round"/>
+            <path d="M12.5 22L16 25L19.5 22" stroke="url(#opShieldGrad)" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+          <span class="avatar-status-dot" title="Status: Active Online"></span>
+        </div>
         <div class="user-details">
           <div class="user-name">{{ user.name }}</div>
           <div class="user-role">{{ user.role | capitalize }}</div>
         </div>
       </div>
-      <a href="/logout" class="logout-btn" title="Logout"><i class="fas fa-sign-out-alt"></i></a>
+      <a href="/logout" onclick="event.stopPropagation();" class="logout-btn" title="Logout"><i class="fas fa-sign-out-alt"></i></a>
     </div>
   </aside>
+
+  <!-- Mobile sidebar overlay -->
+  <div class="sidebar-overlay" id="sidebarOverlay"></div>
 
   <!-- ════════════════ MAIN CONTENT ════════════════ -->
   <main class="main-content" id="mainContent">
 
     <!-- TOP BAR -->
     <header class="topbar">
-      <div class="topbar-left">
-        <h2 class="page-title" id="pageTitle">Live Cameras</h2>
-        <div class="breadcrumb">Dashboard › <span id="breadcrumbSub">Live Cameras</span></div>
+      <div class="topbar-left" style="display:flex;align-items:center;gap:12px;">
+        <!-- Hamburger: visible only on mobile via CSS -->
+        <button class="topbar-menu-btn" id="mobileMenuBtn" title="Open Menu">
+          <i class="fas fa-bars"></i>
+        </button>
+        <div>
+          <h2 class="page-title" id="pageTitle">Live Cameras</h2>
+          <div class="breadcrumb">Dashboard › <span id="breadcrumbSub">Live Cameras</span></div>
+        </div>
       </div>
       <div class="topbar-right">
         <button class="btn btn-primary btn-sm" id="refreshSystemBtn" title="Refresh System Data & Feeds">
@@ -179,13 +291,43 @@
           <span class="status-dot green"></span> System Online
         </div>
         <div class="time-display" id="timeDisplay"></div>
-        <button class="icon-btn" id="themeToggleBtn" title="Toggle Theme">
-          <i class="fas fa-moon" id="themeIcon"></i>
-        </button>
-        <button class="icon-btn notification-btn" id="notifBtn" title="Notifications">
-          <i class="fas fa-bell"></i>
-          <span class="notif-dot" id="notifDot" style="display:none;"></span>
-        </button>
+        <!-- BB8 Theme Toggle -->
+        <div class="bb8-toggle-wrap">
+        <label class="bb8-toggle" title="Toggle Dark / Light Theme" id="themeToggleBtn">
+          <input class="bb8-toggle__checkbox" type="checkbox" id="bb8ThemeCheckbox" />
+          <div class="bb8-toggle__container">
+            <div class="bb8-toggle__scenery">
+              <div class="bb8-toggle__star"></div>
+              <div class="bb8-toggle__star"></div>
+              <div class="bb8-toggle__star"></div>
+              <div class="bb8-toggle__star"></div>
+              <div class="bb8-toggle__star"></div>
+              <div class="bb8-toggle__star"></div>
+              <div class="bb8-toggle__star"></div>
+              <div class="tatto-1"></div>
+              <div class="tatto-2"></div>
+              <div class="gomrassen"></div>
+              <div class="hermes"></div>
+              <div class="chenini"></div>
+              <div class="bb8-toggle__cloud"></div>
+              <div class="bb8-toggle__cloud"></div>
+              <div class="bb8-toggle__cloud"></div>
+            </div>
+            <div class="bb8">
+              <div class="bb8__head-container">
+                <div class="bb8__antenna"></div>
+                <div class="bb8__antenna"></div>
+                <div class="bb8__head"></div>
+              </div>
+              <div class="bb8__body"></div>
+            </div>
+            <div class="artificial__hidden">
+              <div class="bb8__shadow"></div>
+            </div>
+          </div>
+        </label>
+        </div>
+
       </div>
     </header>
 
@@ -200,12 +342,51 @@
         </div>
       </div>
       <div class="camera-grid" id="cameraGrid">
-        <div class="no-cameras-msg" id="noCamerasMsg">
-          <i class="fas fa-video-slash"></i>
-          <h4>No cameras configured</h4>
-          <p>Add a camera to start monitoring.</p>
-          <button class="btn btn-primary" onclick="switchSection('add-camera')">
-            <i class="fas fa-plus"></i> Add Camera
+        <!-- Zero-Wait Cyber Skeleton Shimmer Cards -->
+        <div class="camera-card camera-card-skeleton">
+          <div class="camera-feed-wrap skeleton-shimmer" style="aspect-ratio: 4/3;">
+            <div class="skeleton-feed-icon"><i class="fas fa-video"></i></div>
+          </div>
+          <div class="camera-controls">
+            <div style="flex:1;">
+              <div class="skeleton-line skeleton-shimmer" style="width:60%;height:14px;margin-bottom:6px;"></div>
+              <div class="skeleton-line skeleton-shimmer" style="width:35%;height:10px;"></div>
+            </div>
+            <div style="display:flex;gap:8px;align-items:center;">
+              <div class="skeleton-circle skeleton-shimmer" style="width:28px;height:28px;border-radius:6px;"></div>
+              <div class="skeleton-pill skeleton-shimmer" style="width:44px;height:24px;border-radius:12px;"></div>
+            </div>
+          </div>
+        </div>
+        <div class="camera-card camera-card-skeleton">
+          <div class="camera-feed-wrap skeleton-shimmer" style="aspect-ratio: 4/3;">
+            <div class="skeleton-feed-icon"><i class="fas fa-video"></i></div>
+          </div>
+          <div class="camera-controls">
+            <div style="flex:1;">
+              <div class="skeleton-line skeleton-shimmer" style="width:72%;height:14px;margin-bottom:6px;"></div>
+              <div class="skeleton-line skeleton-shimmer" style="width:45%;height:10px;"></div>
+            </div>
+            <div style="display:flex;gap:8px;align-items:center;">
+              <div class="skeleton-circle skeleton-shimmer" style="width:28px;height:28px;border-radius:6px;"></div>
+              <div class="skeleton-pill skeleton-shimmer" style="width:44px;height:24px;border-radius:12px;"></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="no-cameras-msg" id="noCamerasMsg" style="display:none;">
+          <div class="empty-state-radar">
+            <i class="fas fa-video-slash empty-radar-icon"></i>
+          </div>
+          <h4>No Active Surveillance Streams</h4>
+          <p>Connect your IP/RTSP streams, USB webcams, or local video files to activate real-time AI theft detection with YOLOv8 & DeepSORT tracking.</p>
+          <div class="empty-state-steps">
+            <div class="empty-step-badge"><i class="fas fa-plug"></i> 1. Select Video Source</div>
+            <div class="empty-step-badge"><i class="fas fa-brain"></i> 2. Activate AI Detection</div>
+            <div class="empty-step-badge"><i class="fas fa-shield-alt"></i> 3. 24/7 Shoplifting Sentinel</div>
+          </div>
+          <button class="btn btn-primary btn-lg" onclick="switchSection('add-camera')" style="padding: 12px 24px; font-size: 0.95rem;">
+            <i class="fas fa-plus-circle"></i> Add New Camera Stream
           </button>
         </div>
       </div>
@@ -248,7 +429,7 @@
             <div class="global-alert-toggle">
               <span>Global Alerts</span>
               <label class="toggle-switch">
-                <input type="checkbox" id="globalAlertsToggle" checked>
+                <input type="checkbox" id="globalAlertsToggle">
                 <span class="toggle-slider"></span>
               </label>
             </div>
@@ -261,27 +442,44 @@
           </div>
         </div>
         <!-- Sound controls -->
-        <div class="sound-controls card-mini">
-          <i class="fas fa-volume-up" style="color:var(--accent)"></i>
-          <span>Alert Sound:</span>
-          <label class="toggle-switch">
-            <input type="checkbox" id="soundToggle" checked>
-            <span class="toggle-slider"></span>
-          </label>
-          <input type="range" id="volumeSlider" min="0" max="100" value="80" class="volume-slider">
-          <span class="volume-val" id="volVal">80%</span>
-          <select id="toneSelect" class="tone-select">
-            <option value="beep">Beep</option>
-            <option value="alarm">Alarm</option>
-            <option value="chime">Chime</option>
-          </select>
-          <button class="btn-sm" id="testSoundBtn"><i class="fas fa-play"></i> Test</button>
+        <div class="sound-controls card-mini" id="soundControlsPanel">
+          <div class="sound-header-group">
+            <i class="fas fa-volume-up sound-icon" id="soundIcon"></i>
+            <span class="sound-title">Alert Sound:</span>
+            <label class="toggle-switch" title="Toggle Alert Sound">
+              <input type="checkbox" id="soundToggle">
+              <span class="toggle-slider"></span>
+            </label>
+            <!-- Audio Sound Waves Visualizer -->
+            <div class="sound-wave-bars is-muted" id="soundWaveBars" title="Audio Spectrum Visualizer (Click to Test)">
+              <span class="sound-bar bar-1"></span>
+              <span class="sound-bar bar-2"></span>
+              <span class="sound-bar bar-3"></span>
+              <span class="sound-bar bar-4"></span>
+              <span class="sound-bar bar-5"></span>
+            </div>
+          </div>
+          <div class="sound-slider-group">
+            <input type="range" id="volumeSlider" min="0" max="100" value="80" class="volume-slider" style="--vol-fill: 80%;" title="Volume Slider">
+            <span class="volume-val" id="volVal">80%</span>
+          </div>
+          <div class="sound-actions-group">
+            <select id="toneSelect" class="tone-select" title="Select Alert Tone">
+              <option value="beep">Beep</option>
+              <option value="alarm">Alarm</option>
+              <option value="chime">Chime</option>
+            </select>
+            <button class="btn-sm" id="testSoundBtn"><i class="fas fa-play"></i> Test</button>
+          </div>
         </div>
       </div>
       <div class="alerts-list" id="alertsList">
         <div class="empty-state">
-          <i class="fas fa-shield-alt"></i>
-          <p>No alerts. System monitoring actively.</p>
+          <div class="empty-state-radar" style="width: 80px; height: 80px; margin-bottom: 16px;">
+            <i class="fas fa-shield-alt empty-radar-icon" style="font-size: 1.8rem; color: var(--green);"></i>
+          </div>
+          <h4>No Security Alerts Detected</h4>
+          <p>Real-time shoplifting heuristics and neural detection sentinel are actively monitoring all feeds.</p>
         </div>
       </div>
     </section>
@@ -752,7 +950,7 @@
               <div class="setting-label">Sound Notifications</div>
               <div class="setting-desc">Play sound on detection</div>
             </div>
-            <label class="toggle-switch"><input type="checkbox" id="soundSettingToggle" checked><span
+            <label class="toggle-switch"><input type="checkbox" id="soundSettingToggle"><span
                 class="toggle-slider"></span></label>
           </div>
         </div>
@@ -818,6 +1016,300 @@
       </div>
     </section>
 
+    <!-- ══ SECTION: PROFILE ══ -->
+    <section class="section" id="section-profile">
+      <div class="section-header" style="margin-bottom:28px;">
+        <div class="section-title-row">
+          <h3><i class="fas fa-user-circle" style="color:var(--accent);margin-right:10px;"></i>My Profile</h3>
+        </div>
+      </div>
+
+      <div style="display:grid;grid-template-columns:340px 1fr;gap:24px;align-items:start;">
+
+        <!-- LEFT: Profile Card -->
+        <div style="display:flex;flex-direction:column;gap:20px;">
+
+          <!-- Avatar + Name Card -->
+          <div class="card-panel" style="text-align:center;padding:32px 24px;">
+            <div style="position:relative;display:inline-block;margin-bottom:18px;">
+              <div style="
+                width:90px;height:90px;border-radius:50%;
+                background:linear-gradient(135deg,var(--accent),var(--green));
+                display:flex;align-items:center;justify-content:center;
+                font-size:2.2rem;font-weight:800;color:#fff;
+                margin:0 auto;
+                box-shadow:0 0 0 4px var(--accent-glow),0 8px 28px rgba(0,0,0,0.3);
+              ">{{ user.name[0].upper() }}</div>
+              <!-- Online indicator -->
+              <div style="
+                position:absolute;bottom:4px;right:4px;
+                width:18px;height:18px;border-radius:50%;
+                background:var(--green);border:3px solid var(--bg-card);
+                box-shadow:0 0 8px var(--green);
+              "></div>
+            </div>
+            <div style="font-size:1.3rem;font-weight:800;margin-bottom:4px;">{{ user.name }}</div>
+            <div style="color:var(--text-muted);font-size:0.85rem;margin-bottom:14px;">{{ user.email }}</div>
+            <div style="
+              display:inline-block;
+              background:var(--accent-glow);
+              color:var(--accent);
+              border:1px solid var(--accent);
+              border-radius:20px;
+              padding:4px 16px;
+              font-size:0.75rem;
+              font-weight:700;
+              letter-spacing:1px;
+              text-transform:uppercase;
+            ">{{ user.role | capitalize }}</div>
+          </div>
+
+          <!-- Account Details Card -->
+          <div class="card-panel">
+            <h4 style="margin-bottom:16px;"><i class="fas fa-id-card" style="color:var(--accent);margin-right:8px;"></i>Account Details</h4>
+            <div style="display:flex;flex-direction:column;gap:13px;">
+              <div style="display:flex;justify-content:space-between;align-items:center;padding-bottom:12px;border-bottom:1px solid var(--border);">
+                <span style="color:var(--text-muted);font-size:0.82rem;"><i class="fas fa-user" style="margin-right:6px;width:14px;"></i>Full Name</span>
+                <span style="font-weight:600;font-size:0.88rem;">{{ user.name }}</span>
+              </div>
+              <div style="display:flex;justify-content:space-between;align-items:center;padding-bottom:12px;border-bottom:1px solid var(--border);">
+                <span style="color:var(--text-muted);font-size:0.82rem;"><i class="fas fa-envelope" style="margin-right:6px;width:14px;"></i>Email</span>
+                <span style="font-weight:600;font-size:0.88rem;max-width:180px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;" title="{{ user.email }}">{{ user.email }}</span>
+              </div>
+              <div style="display:flex;justify-content:space-between;align-items:center;padding-bottom:12px;border-bottom:1px solid var(--border);">
+                <span style="color:var(--text-muted);font-size:0.82rem;"><i class="fas fa-shield-alt" style="margin-right:6px;width:14px;"></i>Role</span>
+                <span style="font-weight:600;font-size:0.88rem;color:var(--accent);">{{ user.role | capitalize }}</span>
+              </div>
+              <div style="display:flex;justify-content:space-between;align-items:center;padding-bottom:12px;border-bottom:1px solid var(--border);">
+                <span style="color:var(--text-muted);font-size:0.82rem;"><i class="fas fa-sign-in-alt" style="margin-right:6px;width:14px;"></i>Auth Method</span>
+                <span style="font-weight:600;font-size:0.88rem;text-transform:capitalize;">{{ user.auth_method or 'Local' }}</span>
+              </div>
+              <div style="display:flex;justify-content:space-between;align-items:center;padding-bottom:12px;border-bottom:1px solid var(--border);">
+                <span style="color:var(--text-muted);font-size:0.82rem;"><i class="fas fa-calendar-plus" style="margin-right:6px;width:14px;"></i>Joined</span>
+                <span style="font-weight:600;font-size:0.88rem;">{{ user.created_at.strftime('%b %d, %Y') if user.created_at else 'N/A' }}</span>
+              </div>
+              <div style="display:flex;justify-content:space-between;align-items:center;">
+                <span style="color:var(--text-muted);font-size:0.82rem;"><i class="fas fa-clock" style="margin-right:6px;width:14px;"></i>Last Login</span>
+                <span style="font-weight:600;font-size:0.88rem;">{{ user.last_login.strftime('%b %d, %Y %H:%M') if user.last_login else 'Now' }}</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Status Badges -->
+          <div class="card-panel">
+            <h4 style="margin-bottom:14px;"><i class="fas fa-check-circle" style="color:var(--green);margin-right:8px;"></i>Account Status</h4>
+            <div style="display:flex;flex-direction:column;gap:10px;">
+              <div style="display:flex;justify-content:space-between;align-items:center;">
+                <span style="color:var(--text-secondary);font-size:0.85rem;">Account Active</span>
+                <span style="color:{{ 'var(--green)' if user.is_active else 'var(--red)' }};font-weight:700;font-size:0.82rem;">
+                  <i class="fas fa-{{ 'check-circle' if user.is_active else 'times-circle' }}"></i>
+                  {{ 'Active' if user.is_active else 'Suspended' }}
+                </span>
+              </div>
+              <div style="display:flex;justify-content:space-between;align-items:center;">
+                <span style="color:var(--text-secondary);font-size:0.85rem;">Email Verified</span>
+                <span style="color:{{ 'var(--green)' if user.email_verified else 'var(--yellow)' }};font-weight:700;font-size:0.82rem;">
+                  <i class="fas fa-{{ 'check-circle' if user.email_verified else 'exclamation-circle' }}"></i>
+                  {{ 'Verified' if user.email_verified else 'Not Verified' }}
+                </span>
+              </div>
+              <div style="display:flex;justify-content:space-between;align-items:center;">
+                <span style="color:var(--text-secondary);font-size:0.85rem;">Session Status</span>
+                <span style="color:var(--green);font-weight:700;font-size:0.82rem;">
+                  <i class="fas fa-circle" style="font-size:0.55rem;vertical-align:middle;"></i> Online
+                </span>
+              </div>
+            </div>
+          </div>
+
+        </div>
+
+        <!-- RIGHT: Edit & Preferences -->
+        <div style="display:flex;flex-direction:column;gap:20px;">
+
+          <!-- Change Password -->
+          <div class="card-panel">
+            <h4 style="margin-bottom:18px;"><i class="fas fa-lock" style="color:var(--accent);margin-right:8px;"></i>Change Password</h4>
+            <div style="display:flex;flex-direction:column;gap:14px;">
+              <div class="form-group">
+                <label style="font-size:0.75rem;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.5px;display:block;margin-bottom:6px;">Current Password</label>
+                <input type="password" id="profileCurrentPwd" placeholder="Enter current password" style="width:100%;">
+              </div>
+              <div class="form-group">
+                <label style="font-size:0.75rem;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.5px;display:block;margin-bottom:6px;">New Password</label>
+                <input type="password" id="profileNewPwd" placeholder="Min. 8 characters" style="width:100%;">
+              </div>
+              <div class="form-group">
+                <label style="font-size:0.75rem;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.5px;display:block;margin-bottom:6px;">Confirm New Password</label>
+                <input type="password" id="profileConfirmPwd" placeholder="Repeat new password" style="width:100%;">
+              </div>
+              <!-- Strength bar -->
+              <div id="profilePwdStrengthWrap" style="display:none;">
+                <div style="font-size:0.72rem;color:var(--text-muted);margin-bottom:4px;">Password Strength</div>
+                <div style="height:5px;background:var(--border);border-radius:4px;overflow:hidden;">
+                  <div id="profilePwdStrengthBar" style="height:100%;width:0%;border-radius:4px;transition:width 0.3s,background 0.3s;"></div>
+                </div>
+                <div id="profilePwdStrengthLabel" style="font-size:0.72rem;margin-top:4px;"></div>
+              </div>
+              <button class="btn btn-primary" id="profileSavePwdBtn" style="align-self:flex-start;padding:10px 24px;">
+                <i class="fas fa-save"></i> Update Password
+              </button>
+              <div id="profilePwdMsg" style="font-size:0.83rem;display:none;"></div>
+            </div>
+          </div>
+
+          <!-- Notification Preferences -->
+          <div class="card-panel">
+            <h4 style="margin-bottom:18px;"><i class="fas fa-bell" style="color:var(--accent);margin-right:8px;"></i>Notification Preferences</h4>
+            <div style="display:flex;flex-direction:column;gap:14px;">
+              <div class="setting-row">
+                <div>
+                  <div class="setting-label"><i class="fas fa-envelope" style="margin-right:6px;color:var(--accent);"></i>Email Alerts</div>
+                  <div class="setting-desc">Receive detection alerts by email</div>
+                </div>
+                <label class="toggle-switch">
+                  <input type="checkbox" id="profileEmailAlert" {{ 'checked' if user.email_alerts }}>
+                  <span class="toggle-slider"></span>
+                </label>
+              </div>
+              <div class="setting-row" style="border-top:1px solid var(--border);padding-top:14px;">
+                <div>
+                  <div class="setting-label"><i class="fas fa-mobile-alt" style="margin-right:6px;color:var(--green);"></i>Push Notifications</div>
+                  <div class="setting-desc">Firebase FCM push alerts</div>
+                </div>
+                <label class="toggle-switch">
+                  <input type="checkbox" id="profilePushAlert" {{ 'checked' if user.push_alerts }}>
+                  <span class="toggle-slider"></span>
+                </label>
+              </div>
+              <div class="setting-row" style="border-top:1px solid var(--border);padding-top:14px;">
+                <div>
+                  <div class="setting-label"><i class="fas fa-volume-up" style="margin-right:6px;color:var(--yellow);"></i>Sound Alerts</div>
+                  <div class="setting-desc">Audio alarm on detection</div>
+                </div>
+                <label class="toggle-switch">
+                  <input type="checkbox" id="profileSoundAlert" {{ 'checked' if user.sound_alerts }}>
+                  <span class="toggle-slider"></span>
+                </label>
+              </div>
+              <button class="btn btn-primary" id="profileSavePrefsBtn" style="align-self:flex-start;padding:10px 24px;margin-top:4px;">
+                <i class="fas fa-save"></i> Save Preferences
+              </button>
+              <div id="profilePrefsMsg" style="font-size:0.83rem;display:none;"></div>
+            </div>
+          </div>
+
+          <!-- Danger Zone -->
+          <div class="card-panel" style="border-color:rgba(217,104,104,0.3);">
+            <h4 style="margin-bottom:14px;color:var(--red);"><i class="fas fa-exclamation-triangle" style="margin-right:8px;"></i>Danger Zone</h4>
+            <p style="color:var(--text-muted);font-size:0.85rem;margin-bottom:18px;">Logging out will end your current session. You will need to sign in again to access the dashboard.</p>
+            <a href="/logout" class="btn btn-outline-danger" style="display:inline-flex;align-items:center;gap:8px;">
+              <i class="fas fa-sign-out-alt"></i> Sign Out
+            </a>
+          </div>
+
+        </div>
+      </div>
+    </section>
+
+    <!-- Profile page JS (inline, minimal) -->
+    <script>
+    (function(){
+      // Password strength checker
+      const newPwd = document.getElementById('profileNewPwd');
+      const strengthBar = document.getElementById('profilePwdStrengthBar');
+      const strengthLabel = document.getElementById('profilePwdStrengthLabel');
+      const strengthWrap = document.getElementById('profilePwdStrengthWrap');
+
+      if(newPwd){
+        newPwd.addEventListener('input', function(){
+          const v = this.value;
+          if(!v){ strengthWrap.style.display='none'; return; }
+          strengthWrap.style.display='block';
+          let score = 0;
+          if(v.length >= 8) score++;
+          if(/[A-Z]/.test(v)) score++;
+          if(/[0-9]/.test(v)) score++;
+          if(/[^A-Za-z0-9]/.test(v)) score++;
+          const colors = ['#D96868','#D96868','#91AE6E','#689D4B'];
+          const labels = ['Weak','Fair','Good','Strong'];
+          const widths = [25,50,75,100];
+          strengthBar.style.width = widths[score-1]+'%';
+          strengthBar.style.background = colors[score-1];
+          strengthLabel.style.color = colors[score-1];
+          strengthLabel.textContent = labels[score-1];
+        });
+      }
+
+      // Change password
+      const savePwdBtn = document.getElementById('profileSavePwdBtn');
+      if(savePwdBtn){
+        savePwdBtn.addEventListener('click', async function(){
+          const cur = document.getElementById('profileCurrentPwd').value;
+          const nw = document.getElementById('profileNewPwd').value;
+          const cf = document.getElementById('profileConfirmPwd').value;
+          const msg = document.getElementById('profilePwdMsg');
+          if(!cur||!nw||!cf){ showMsg(msg,'All fields are required.','var(--red)'); return; }
+          if(nw !== cf){ showMsg(msg,'Passwords do not match.','var(--red)'); return; }
+          if(nw.length < 8){ showMsg(msg,'Password must be at least 8 characters.','var(--red)'); return; }
+          savePwdBtn.disabled=true;
+          savePwdBtn.innerHTML='<i class="fas fa-spinner fa-spin"></i> Saving...';
+          try{
+            const r = await fetch('/api/profile/change-password',{
+              method:'POST',
+              headers:{'Content-Type':'application/json'},
+              body:JSON.stringify({current_password:cur,new_password:nw})
+            });
+            const d = await r.json();
+            if(d.success){
+              showMsg(msg, '✓ Password updated successfully!','var(--green)');
+              document.getElementById('profileCurrentPwd').value='';
+              document.getElementById('profileNewPwd').value='';
+              document.getElementById('profileConfirmPwd').value='';
+              strengthWrap.style.display='none';
+            } else {
+              showMsg(msg, d.message || 'Failed to update password.','var(--red)');
+            }
+          }catch(e){ showMsg(msg,'Network error. Try again.','var(--red)'); }
+          savePwdBtn.disabled=false;
+          savePwdBtn.innerHTML='<i class="fas fa-save"></i> Update Password';
+        });
+      }
+
+      // Save preferences
+      const savePrefsBtn = document.getElementById('profileSavePrefsBtn');
+      if(savePrefsBtn){
+        savePrefsBtn.addEventListener('click', async function(){
+          const msg = document.getElementById('profilePrefsMsg');
+          savePrefsBtn.disabled=true;
+          savePrefsBtn.innerHTML='<i class="fas fa-spinner fa-spin"></i> Saving...';
+          try{
+            const r = await fetch('/api/profile/preferences',{
+              method:'POST',
+              headers:{'Content-Type':'application/json'},
+              body:JSON.stringify({
+                email_alerts: document.getElementById('profileEmailAlert').checked,
+                push_alerts: document.getElementById('profilePushAlert').checked,
+                sound_alerts: document.getElementById('profileSoundAlert').checked
+              })
+            });
+            const d = await r.json();
+            showMsg(msg, d.success ? '✓ Preferences saved!' : (d.message||'Failed.'), d.success?'var(--green)':'var(--red)');
+          }catch(e){ showMsg(msg,'Network error. Try again.','var(--red)'); }
+          savePrefsBtn.disabled=false;
+          savePrefsBtn.innerHTML='<i class="fas fa-save"></i> Save Preferences';
+        });
+      }
+
+      function showMsg(el, text, color){
+        el.style.display='block';
+        el.style.color=color;
+        el.textContent=text;
+        setTimeout(()=>{ el.style.display='none'; }, 4000);
+      }
+    })();
+    </script>
+
   </main>
 
   <!-- ════════════════ MODALS ════════════════ -->
@@ -844,5 +1336,4 @@
   <!-- UX Enhancer: smooth transitions, ripples, page-loader, performance layer -->
   <script src="/static/js/ux_enhancer.js" defer></script>
 </body>
-
 </html>

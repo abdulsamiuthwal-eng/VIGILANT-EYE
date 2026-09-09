@@ -30,10 +30,10 @@ class User(UserMixin, db.Model):
     auth_method = db.Column(db.String(50), default="local")
     verification_token = db.Column(db.String(100), nullable=True)
 
-    # Preferences
-    email_alerts = db.Column(db.Boolean, default=True)
-    push_alerts = db.Column(db.Boolean, default=True)
-    sound_alerts = db.Column(db.Boolean, default=True)
+    # Preferences (default to OFF for new users)
+    email_alerts = db.Column(db.Boolean, default=False)
+    push_alerts = db.Column(db.Boolean, default=False)
+    sound_alerts = db.Column(db.Boolean, default=False)
     theme = db.Column(db.String(10), default="dark")
 
     def set_password(self, password):
@@ -72,8 +72,8 @@ class Camera(db.Model):
     camera_type = db.Column(db.String(30), default="usb")  # usb / wifi / ip / mobile
     location = db.Column(db.String(100), default="Unspecified")
     is_active = db.Column(db.Boolean, default=False)
-    detection_enabled = db.Column(db.Boolean, default=True)
-    alert_enabled = db.Column(db.Boolean, default=True)
+    detection_enabled = db.Column(db.Boolean, default=False)
+    alert_enabled = db.Column(db.Boolean, default=False)
     added_at = db.Column(db.DateTime, default=datetime.utcnow)
     last_seen = db.Column(db.DateTime, nullable=True)
 

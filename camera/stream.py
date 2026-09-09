@@ -16,28 +16,28 @@ OFFLINE_FRAME_CACHE = None
 
 
 def _make_offline_frame(width=640, height=480, message="Camera Offline"):
-    """Generate a styled 'offline' placeholder frame."""
+    """Generate a styled 'offline' placeholder frame in Sentinel Theme colors."""
     frame = np.zeros((height, width, 3), dtype=np.uint8)
-    frame[:] = (20, 20, 35)  # Dark blue-black background
+    frame[:] = (18, 22, 19)  # Sentinel tactical dark background (BGR)
 
-    # Grid lines
+    # Tactical grid lines
     for x in range(0, width, 40):
-        cv2.line(frame, (x, 0), (x, height), (30, 30, 50), 1)
+        cv2.line(frame, (x, 0), (x, height), (26, 34, 28), 1)
     for y in range(0, height, 40):
-        cv2.line(frame, (0, y), (width, y), (30, 30, 50), 1)
+        cv2.line(frame, (0, y), (width, y), (26, 34, 28), 1)
 
-    # Icon area (camera crossed out)
+    # Icon area (camera crossed out) in tactical green tone
     center_x, center_y = width // 2, height // 2 - 30
-    cv2.circle(frame, (center_x, center_y), 40, (60, 60, 90), 2)
+    cv2.circle(frame, (center_x, center_y), 42, (60, 105, 75), 2)
     cv2.line(frame, (center_x - 30, center_y - 30),
-             (center_x + 30, center_y + 30), (100, 80, 80), 3)
+             (center_x + 30, center_y + 30), (65, 95, 70), 3)
 
-    # Status text
-    cv2.putText(frame, message, (width // 2 - 90, center_y + 70),
-                cv2.FONT_HERSHEY_SIMPLEX, 0.7, (150, 150, 180), 2)
-    cv2.putText(frame, "Toggle camera ON to start feed",
-                (width // 2 - 140, center_y + 100),
-                cv2.FONT_HERSHEY_SIMPLEX, 0.45, (100, 100, 130), 1)
+    # Status text in theme sage green #91AE6E (BGR: 110, 174, 145)
+    cv2.putText(frame, message, (width // 2 - 95, center_y + 70),
+                cv2.FONT_HERSHEY_SIMPLEX, 0.72, (110, 174, 145), 2)
+    cv2.putText(frame, "STANDBY - Toggle camera ON to start feed",
+                (width // 2 - 165, center_y + 102),
+                cv2.FONT_HERSHEY_SIMPLEX, 0.44, (85, 130, 105), 1)
     return frame
 
 

@@ -2,11 +2,12 @@
 <html lang="en">
 
 <head>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Login — Vigilant Eye</title>
   <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700;900&display=swap" rel="stylesheet">
-  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet">
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css" rel="stylesheet">
   <script src="https://accounts.google.com/gsi/client" async defer></script>
   <script>
     if (!sessionStorage.getItem('splash_shown')) {
@@ -21,16 +22,18 @@
     }
 
     :root {
-      --palette-glow: #E3FDFD;
-      --palette-mist: #CBF1F5;
-      --palette-aqua: #A6E3E9;
-      --palette-teal: #71C9CE;
+      --palette-coral: #D96868;     /* Main primary color (top swatch) */
+      --palette-bg: #F2F2F2;        /* Clean light neutral */
+      --palette-sage: #91AE6E;      /* Secondary sage green */
+      --palette-forest: #689D4B;    /* Deep forest olive green */
+      --text-main: #1F2421;         /* Deep high-contrast text for 100% visibility */
+      --text-sub: #4A5568;          /* Crisp secondary text */
     }
 
     body {
       font-family: 'Outfit', sans-serif;
-      background: #03080e;
-      color: #E3FDFD;
+      background: #F2F2F2;
+      color: #1F2421;
       min-height: 100vh;
       display: flex;
       position: relative;
@@ -41,32 +44,102 @@
       display: flex;
       width: 100%;
       min-height: 100vh;
+      position: relative;
+      background: linear-gradient(135deg, rgba(24, 28, 25, 0.88) 0%, rgba(18, 22, 19, 0.95) 100%),
+                  url('/static/images/surveillance_bg.jpg') center/cover no-repeat;
+      overflow: hidden;
+    }
+
+    /* Ambient luminous wash spanning across the left and organically dissolving into the surveillance room with ZERO hard seam */
+    .login-container::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 62%;
+      height: 100%;
+      background: linear-gradient(to right, 
+        rgba(248, 250, 247, 0.98) 0%, 
+        rgba(245, 248, 243, 0.96) 42%, 
+        rgba(238, 244, 235, 0.82) 58%, 
+        rgba(220, 232, 215, 0.48) 72%, 
+        rgba(145, 174, 110, 0.20) 84%, 
+        rgba(24, 28, 25, 0.05) 94%, 
+        transparent 100%);
+      pointer-events: none;
+      z-index: 1;
     }
 
     .login-left {
       flex: 0 0 50%;
       width: 50%;
-      background: rgba(3, 8, 14, 0.98);
-      border-right: 1px solid rgba(166, 227, 233, 0.12);
+      background: transparent;
       display: flex;
       flex-direction: column;
       justify-content: center;
-      padding: 40px 48px;
+      align-items: center;
+      padding: 16px 24px;
       position: relative;
       z-index: 10;
-      box-shadow: 15px 0 50px rgba(0, 0, 0, 0.7);
+      overflow-x: hidden;
       overflow-y: auto;
+      scrollbar-width: none; /* Firefox: completely hide scrollbar */
+      -ms-overflow-style: none; /* IE/Edge */
+    }
+
+    .login-left::-webkit-scrollbar {
+      display: none; /* Chrome, Safari, Opera: completely hide scrollbar */
+      width: 0;
+      height: 0;
     }
 
     .login-right {
       flex: 0 0 50%;
       width: 50%;
       position: relative;
-      background: #020509;
+      background: transparent;
       display: flex;
       align-items: center;
       justify-content: center;
       overflow: hidden;
+    }
+
+    .cyber-hud-badge {
+      position: absolute;
+      z-index: 20;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 14px;
+      border-radius: 8px;
+      background: rgba(24, 28, 25, 0.75);
+      border: 1px solid rgba(145, 174, 110, 0.35);
+      backdrop-filter: blur(14px);
+      -webkit-backdrop-filter: blur(14px);
+      color: #F2F2F2;
+      font-size: 0.72rem;
+      font-weight: 700;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
+      pointer-events: none;
+    }
+    .cyber-hud-badge.top-left { top: 22px; left: 22px; }
+    .cyber-hud-badge.top-right { top: 22px; right: 22px; }
+    .cyber-hud-badge.bottom-left { bottom: 22px; left: 22px; }
+    .cyber-hud-badge.bottom-right { bottom: 22px; right: 22px; }
+
+    .hud-live-dot {
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+      background: #D96868;
+      box-shadow: 0 0 10px #D96868;
+      animation: hudDotPulse 1.4s ease-in-out infinite;
+    }
+    @keyframes hudDotPulse {
+      0%, 100% { transform: scale(1); opacity: 1; }
+      50% { transform: scale(1.4); opacity: 0.4; }
     }
 
     #surveillanceCanvas {
@@ -78,14 +151,20 @@
       display: block;
     }
 
-    /* Ambient cyber grid with calibrated ice-cyan */
+    /* Ambient cyber grid */
     .bg-grid {
       position: absolute;
-      inset: 0;
-      background-image: linear-gradient(rgba(166, 227, 233, 0.035) 1px, transparent 1px),
-        linear-gradient(90deg, rgba(166, 227, 233, 0.035) 1px, transparent 1px);
-      background-size: 50px 50px;
+      top: 0;
+      left: 0;
+      width: 58%;
+      height: 100%;
+      background-image: linear-gradient(rgba(145, 174, 110, 0.14) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(145, 174, 110, 0.14) 1px, transparent 1px);
+      background-size: 40px 40px;
       pointer-events: none;
+      -webkit-mask-image: linear-gradient(to right, black 0%, black 40%, transparent 92%);
+      mask-image: linear-gradient(to right, black 0%, black 40%, transparent 92%);
+      z-index: 2;
     }
 
     .bg-glow {
@@ -93,7 +172,7 @@
       width: 450px;
       height: 450px;
       border-radius: 50%;
-      background: radial-gradient(circle, rgba(113, 201, 206, 0.16) 0%, rgba(166, 227, 233, 0.06) 45%, transparent 70%);
+      background: radial-gradient(circle, rgba(217, 104, 104, 0.16) 0%, rgba(145, 174, 110, 0.1) 45%, transparent 70%);
       top: 50%;
       left: 50%;
       transform: translate(-50%, -50%);
@@ -103,20 +182,23 @@
     .card {
       position: relative;
       z-index: 10;
-      background: rgba(6, 15, 24, 0.72);
-      backdrop-filter: blur(28px);
-      border: 1px solid rgba(166, 227, 233, 0.16);
-      border-radius: 22px;
-      padding: 42px 38px;
+      background: rgba(255, 255, 255, 0.90);
+      backdrop-filter: blur(28px) saturate(190%);
+      -webkit-backdrop-filter: blur(28px) saturate(190%);
+      border: 1.5px solid rgba(145, 174, 110, 0.45);
+      border-top: 4px solid #D96868;
+      border-radius: 20px;
+      padding: 20px 26px;
       width: 100%;
-      box-shadow: 0 25px 70px rgba(0, 0, 0, 0.6), 0 0 40px rgba(113, 201, 206, 0.08);
-      animation: slideUp 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+      max-width: 440px;
+      box-shadow: 0 24px 60px -12px rgba(0, 0, 0, 0.16), 0 0 0 1px rgba(255, 255, 255, 0.9) inset, 0 8px 24px rgba(217, 104, 104, 0.1);
+      animation: slideUp 0.5s cubic-bezier(0.4, 0, 0.2, 1);
     }
 
     @keyframes slideUp {
       from {
         opacity: 0;
-        transform: translateY(30px);
+        transform: translateY(20px);
       }
       to {
         opacity: 1;
@@ -127,91 +209,88 @@
     .logo {
       display: flex;
       align-items: center;
-      gap: 14px;
-      margin-bottom: 25px;
+      gap: 12px;
+      margin-bottom: 8px;
       justify-content: center;
     }
 
     .logo-eye {
-      width: 48px;
-      height: 48px;
-      border-radius: 14px;
-      background: linear-gradient(135deg, #71C9CE 0%, #A6E3E9 100%);
+      width: 38px;
+      height: 38px;
+      border-radius: 12px;
+      background: linear-gradient(135deg, #D96868 0%, #C45555 100%);
       display: flex;
       align-items: center;
       justify-content: center;
-      font-size: 24px;
-      color: #03080e;
-      box-shadow: 0 0 25px rgba(113, 201, 206, 0.55), 0 0 10px rgba(166, 227, 233, 0.35);
+      font-size: 19px;
+      color: #FFFFFF;
+      box-shadow: 0 4px 14px rgba(217, 104, 104, 0.35);
     }
 
     .logo-text {
-      font-size: 1.45rem;
+      font-size: 1.30rem;
       font-weight: 900;
-      letter-spacing: 1.5px;
-      background: linear-gradient(90deg, #E3FDFD 0%, #A6E3E9 50%, #71C9CE 100%);
+      letter-spacing: 1.2px;
+      color: #D96868;
+      background: linear-gradient(90deg, #D96868 0%, #689D4B 100%);
       -webkit-background-clip: text;
       -webkit-text-fill-color: transparent;
     }
 
     h1 {
-      font-size: 1.55rem;
-      font-weight: 800;
-      margin-bottom: 6px;
+      font-size: 1.36rem;
+      font-weight: 900;
+      margin-bottom: 2px;
       text-align: center;
-      color: #E3FDFD;
-      letter-spacing: -0.5px;
+      color: #111827;
+      letter-spacing: -0.4px;
     }
 
     .subtitle {
-      color: rgba(203, 241, 245, 0.65);
-      font-size: 0.86rem;
+      color: #4B5563;
+      font-size: 0.80rem;
+      font-weight: 600;
       text-align: center;
-      margin-bottom: 28px;
+      margin-bottom: 10px;
     }
 
     /* Flash messages */
     .flash {
-      padding: 12px 16px;
-      border-radius: 12px;
-      margin-bottom: 20px;
-      font-size: 0.85rem;
+      padding: 10px 14px;
+      border-radius: 10px;
+      margin-bottom: 14px;
+      font-size: 0.84rem;
+      font-weight: 700;
       display: flex;
       align-items: center;
       gap: 8px;
+      background: #FFFFFF;
+      border: 2px solid #D96868;
+      color: #111827;
+      box-shadow: 0 4px 12px rgba(217, 104, 104, 0.1);
     }
 
-    .flash.danger {
-      background: rgba(255, 77, 109, 0.14);
-      border: 1px solid rgba(255, 77, 109, 0.3);
-      color: #ff99ab;
-    }
-
-    .flash.success {
-      background: rgba(46, 196, 182, 0.15);
-      border: 1px solid rgba(46, 196, 182, 0.35);
-      color: #CBF1F5;
-    }
-
+    .flash.danger,
+    .flash.success,
     .flash.warning {
-      background: rgba(255, 159, 28, 0.14);
-      border: 1px solid rgba(255, 159, 28, 0.3);
-      color: #ffe6a7;
+      background: #FFFFFF;
+      border: 2px solid #D96868;
+      color: #111827;
     }
 
     /* Form */
     .form-group {
-      margin-bottom: 20px;
+      margin-bottom: 12px;
       position: relative;
     }
 
     label {
       display: block;
-      font-size: 0.76rem;
-      color: rgba(203, 241, 245, 0.75);
-      margin-bottom: 7px;
-      font-weight: 700;
-      letter-spacing: 0.8px;
+      font-size: 0.74rem;
+      color: #111827;
+      margin-bottom: 5px;
+      font-weight: 800;
+      letter-spacing: 0.6px;
       text-transform: uppercase;
     }
 
@@ -221,98 +300,109 @@
 
     .input-icon {
       position: absolute;
-      left: 14px;
+      left: 13px;
       top: 50%;
       transform: translateY(-50%);
-      color: rgba(166, 227, 233, 0.45);
-      font-size: 0.9rem;
+      color: #D96868;
+      font-size: 0.92rem;
       transition: color 0.25s;
     }
 
     input {
       width: 100%;
-      padding: 13px 13px 13px 42px;
-      background: rgba(203, 241, 245, 0.035);
-      border: 1px solid rgba(166, 227, 233, 0.16);
-      border-radius: 12px;
-      color: #E3FDFD;
+      padding: 10px 12px 10px 38px;
+      background: #FFFFFF !important;
+      border: 2px solid #91AE6E;
+      border-radius: 10px;
+      color: #111827 !important;
       font-family: 'Outfit', sans-serif;
       font-size: 0.92rem;
+      font-weight: 700;
       transition: all 0.25s;
+    }
+
+    input:-webkit-autofill,
+    input:-webkit-autofill:hover, 
+    input:-webkit-autofill:focus {
+      -webkit-box-shadow: 0 0 0px 1000px #FFFFFF inset !important;
+      -webkit-text-fill-color: #111827 !important;
+      border-color: #91AE6E !important;
     }
 
     input:focus {
       outline: none;
-      border-color: #71C9CE;
-      background: rgba(113, 201, 206, 0.08);
-      box-shadow: 0 0 0 3px rgba(113, 201, 206, 0.22), 0 0 20px rgba(166, 227, 233, 0.15);
+      border-color: #D96868 !important;
+      background: #FFFFFF !important;
+      box-shadow: 0 0 0 3px rgba(217, 104, 104, 0.25) !important;
     }
 
     input:focus + .input-icon,
     .input-wrap:focus-within .input-icon {
-      color: #71C9CE;
+      color: #D96868;
     }
 
     input::placeholder {
-      color: rgba(203, 241, 245, 0.25);
+      color: #9CA3AF;
+      font-weight: 500;
     }
 
     .toggle-pass {
       position: absolute;
-      right: 14px;
+      right: 12px;
       top: 50%;
       transform: translateY(-50%);
       cursor: pointer;
-      color: rgba(166, 227, 233, 0.4);
-      transition: color 0.2s;
+      color: #D96868;
+      transition: all 0.2s;
     }
 
     .toggle-pass:hover {
-      color: #E3FDFD;
+      color: #689D4B;
     }
 
     .remember-row {
       display: flex;
       justify-content: space-between;
       align-items: center;
-      margin-bottom: 22px;
+      margin-bottom: 10px;
     }
 
     .checkbox-label {
       display: flex;
       align-items: center;
-      gap: 8px;
+      gap: 7px;
       font-size: 0.82rem;
-      color: rgba(203, 241, 245, 0.7);
+      font-weight: 700;
+      color: #111827;
       cursor: pointer;
     }
 
     .checkbox-label input[type=checkbox] {
-      width: auto;
-      padding: 0;
-      accent-color: #71C9CE;
+      width: 16px;
+      height: 16px;
+      accent-color: #D96868;
+      cursor: pointer;
     }
 
     .forgot-link {
       font-size: 0.82rem;
-      color: #A6E3E9;
-      text-decoration: none;
-      font-weight: 600;
+      color: #D96868;
+      text-decoration: underline;
+      font-weight: 800;
       transition: all 0.2s;
     }
 
     .forgot-link:hover {
-      color: #E3FDFD;
-      text-shadow: 0 0 10px rgba(166, 227, 233, 0.5);
+      color: #689D4B;
     }
 
     .btn-primary {
       width: 100%;
-      padding: 14px;
+      padding: 11px;
       border: none;
-      border-radius: 12px;
-      background: linear-gradient(135deg, #71C9CE 0%, #4ea8ae 100%);
-      color: #030a0f;
+      border-radius: 10px;
+      background: #D96868;
+      color: #FFFFFF;
       font-family: 'Outfit', sans-serif;
       font-size: 0.98rem;
       font-weight: 800;
@@ -321,13 +411,14 @@
       transition: all 0.25s;
       position: relative;
       overflow: hidden;
-      box-shadow: 0 8px 25px rgba(113, 201, 206, 0.4);
+      box-shadow: 0 6px 18px rgba(217, 104, 104, 0.35);
     }
 
     .btn-primary:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 12px 30px rgba(113, 201, 206, 0.55), 0 0 20px rgba(166, 227, 233, 0.4);
-      background: linear-gradient(135deg, #A6E3E9 0%, #71C9CE 100%);
+      transform: translateY(-1px);
+      box-shadow: 0 8px 22px rgba(104, 157, 75, 0.4);
+      background: #689D4B;
+      color: #FFFFFF;
     }
 
     .btn-primary:active {
@@ -336,16 +427,17 @@
 
     .btn-primary.loading {
       pointer-events: none;
-      opacity: 0.75;
+      opacity: 0.85;
     }
 
     .divider {
       display: flex;
       align-items: center;
-      gap: 12px;
-      margin: 22px 0;
-      color: rgba(203, 241, 245, 0.3);
-      font-size: 0.76rem;
+      gap: 10px;
+      margin: 8px 0;
+      color: #6B7280;
+      font-size: 0.74rem;
+      font-weight: 800;
       letter-spacing: 1px;
       text-transform: uppercase;
     }
@@ -355,33 +447,34 @@
       content: '';
       flex: 1;
       height: 1px;
-      background: rgba(166, 227, 233, 0.12);
+      background: #91AE6E;
     }
 
     .register-link {
       text-align: center;
-      font-size: 0.84rem;
-      color: rgba(203, 241, 245, 0.55);
+      font-size: 0.86rem;
+      color: #111827;
+      font-weight: 700;
+      margin-top: 8px;
     }
 
     .register-link a {
-      color: #71C9CE;
-      text-decoration: none;
-      font-weight: 700;
+      color: #D96868;
+      text-decoration: underline;
+      font-weight: 900;
       transition: all 0.2s;
     }
 
     .register-link a:hover {
-      color: #E3FDFD;
-      text-shadow: 0 0 10px rgba(166, 227, 233, 0.5);
+      color: #689D4B;
     }
 
     .spinner {
       display: inline-block;
-      width: 16px;
-      height: 16px;
-      border: 2px solid rgba(3, 10, 15, 0.3);
-      border-top-color: #030a0f;
+      width: 15px;
+      height: 15px;
+      border: 2px solid rgba(255, 255, 255, 0.4);
+      border-top-color: #FFFFFF;
       border-radius: 50%;
       animation: spin 0.8s linear infinite;
       vertical-align: middle;
@@ -402,17 +495,211 @@
         flex: 0 0 100%;
         width: 100%;
         border-right: none;
-        padding: 30px 24px;
+        padding: 24px 18px;
       }
+    }
+
+    /* ─── Demo Credentials Auto-Fill Card ─── */
+    .demo-access-card {
+      background: #FAFDF9;
+      border: 2px solid #91AE6E;
+      border-left: 5px solid #D96868;
+      border-radius: 10px;
+      padding: 7px 11px;
+      margin-bottom: 10px;
+      position: relative;
+      overflow: hidden;
+      cursor: pointer;
+      transition: all 0.25s ease;
+      box-shadow: 0 2px 8px rgba(104, 157, 75, 0.1);
+    }
+
+    .demo-access-card:hover {
+      border-color: #D96868;
+      background: #FFF9F9;
+      transform: translateY(-1px);
+      box-shadow: 0 4px 14px rgba(217, 104, 104, 0.18);
+    }
+
+    .demo-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 6px;
+    }
+
+    .demo-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      font-size: 0.7rem;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 0.6px;
+      color: #FFFFFF;
+      background: #D96868;
+      padding: 3px 8px;
+      border-radius: 6px;
+      box-shadow: 0 2px 6px rgba(217, 104, 104, 0.3);
+    }
+
+    .demo-pill i {
+      font-size: 0.68rem;
+      animation: pulseDemo 1.5s infinite;
+    }
+
+    @keyframes pulseDemo {
+      0%, 100% { transform: scale(1); opacity: 1; }
+      50% { transform: scale(1.2); opacity: 0.8; }
+    }
+
+    .demo-role-tag {
+      font-size: 0.74rem;
+      color: #689D4B;
+      font-weight: 800;
+      font-family: monospace;
+      letter-spacing: 0.5px;
+    }
+
+    .demo-body {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    .demo-creds {
+      font-size: 0.8rem;
+      color: #111827;
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+    }
+
+    .demo-cred-row {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .demo-cred-label {
+      color: #4B5563;
+      font-weight: 700;
+      font-size: 0.74rem;
+      min-width: 40px;
+    }
+
+    .demo-cred-val {
+      font-family: 'SF Mono', Monaco, Consolas, monospace;
+      color: #111827;
+      font-weight: 800;
+      background: #F2F2F2;
+      padding: 2px 6px;
+      border-radius: 4px;
+      border: 1px solid #91AE6E;
+      font-size: 0.78rem;
+    }
+
+    .btn-demo-autofill {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      background: #D96868;
+      border: none;
+      color: #FFFFFF;
+      font-size: 0.78rem;
+      font-weight: 800;
+      padding: 6px 12px;
+      border-radius: 6px;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      font-family: 'Outfit', sans-serif;
+      box-shadow: 0 2px 8px rgba(217, 104, 104, 0.3);
+    }
+
+    .btn-demo-autofill:hover {
+      background: #689D4B;
+      color: #FFFFFF;
+      transform: translateY(-1px);
+    }
+
+    .btn-demo-autofill.filled {
+      background: #689D4B;
+      color: #FFFFFF;
+    }
+
+    /* Auto-fill field highlight animation */
+    .input-autofilled {
+      animation: fieldFlash 1.2s ease-out;
+      border-color: #D96868 !important;
+      box-shadow: 0 0 16px rgba(217, 104, 104, 0.4) !important;
+    }
+
+    @keyframes fieldFlash {
+      0% {
+        background-color: #FFF5F5;
+        transform: scale(1.01);
+      }
+      100% {
+        background-color: #FFFFFF;
+        transform: scale(1);
+      }
+    }
+
+    /* ── Mobile Responsive ── */
+    @media (max-width: 768px) {
+      body { overflow-y: auto; }
+
+      .login-container {
+        flex-direction: column;
+        min-height: 100vh;
+      }
+
+      .login-left {
+        flex: none;
+        width: 100%;
+        min-height: 100vh;
+        border-right: none;
+        border-bottom: none;
+        padding: 24px 20px 40px;
+        box-shadow: none;
+      }
+
+      .login-left::before {
+        right: 0;
+        top: 0;
+        left: 0;
+        bottom: 0;
+        background: #F8FAF7;
+      }
+
+      /* Hide the canvas animation panel on mobile — saves resources */
+      .login-right { display: none; }
+
+      .card {
+        width: 100%;
+        max-width: 420px;
+        padding: 28px 22px;
+      }
+
+      h1 { font-size: 1.5rem; }
+      .subtitle { font-size: 0.85rem; }
+    }
+
+    @media (max-width: 480px) {
+      .login-left { padding: 20px 16px 32px; }
+      .card { padding: 22px 16px; }
+      h1 { font-size: 1.3rem; }
     }
   </style>
 </head>
 
 <body>
   <div class="login-container">
+    <div class="bg-grid"></div>
     <!-- LEFT SIDE: Form & Google login -->
     <div class="login-left">
-      <div class="bg-grid"></div>
       <div class="bg-glow"></div>
       
       <div class="card" id="loginCard">
@@ -433,6 +720,29 @@
           </div>
           {% endfor %}
           {% endwith %}
+        </div>
+
+        <!-- DEMO CREDENTIALS QUICK ACCESS BANNER -->
+        <div class="demo-access-card" id="demoAccessCard" title="Click anywhere on this card to auto-fill demo credentials">
+          <div class="demo-header">
+            <span class="demo-pill"><i class="fas fa-bolt"></i> Demo Access</span>
+            <span class="demo-role-tag"><i class="fas fa-shield-alt"></i> Role: Admin</span>
+          </div>
+          <div class="demo-body">
+            <div class="demo-creds">
+              <div class="demo-cred-row">
+                <span class="demo-cred-label">Email:</span>
+                <span class="demo-cred-val">admin@vigilanteye.com</span>
+              </div>
+              <div class="demo-cred-row">
+                <span class="demo-cred-label">Pass:</span>
+                <span class="demo-cred-val">password123</span>
+              </div>
+            </div>
+            <button type="button" class="btn-demo-autofill" id="demoAutoFillBtn">
+              <i class="fas fa-magic"></i> Auto-Fill
+            </button>
+          </div>
         </div>
 
         <form id="loginForm" method="POST" action="/login">
@@ -465,7 +775,7 @@
         <div class="divider">or</div>
 
         <!-- Google Sign In Container -->
-        <div id="googleBtnContainer" style="width: 100%; display: flex; justify-content: center; min-height: 44px; margin-bottom: 20px;"></div>
+        <div id="googleBtnContainer" style="width: 100%; display: flex; justify-content: center; min-height: 44px; margin-bottom: 10px;"></div>
 
         <div class="register-link">
           Don't have an account? <a href="/register">Create one</a>
@@ -475,11 +785,74 @@
 
     <!-- RIGHT SIDE: Premium animated AI Surveillance scene -->
     <div class="login-right">
+      <div class="cyber-hud-badge top-left">
+        <span class="hud-live-dot"></span>
+        <span>LIVE SURVEILLANCE MATRIX [GRID-01]</span>
+      </div>
+      <div class="cyber-hud-badge top-right">
+        <i class="fas fa-microchip" style="color:var(--palette-sage);"></i>
+        <span>YOLOv8-X &bull; 60 FPS &bull; 12ms LATENCY</span>
+      </div>
+      <div class="cyber-hud-badge bottom-left">
+        <i class="fas fa-shield-alt" style="color:var(--palette-coral);"></i>
+        <span>AI THEFT SENTINEL: ARMED</span>
+      </div>
+      <div class="cyber-hud-badge bottom-right">
+        <i class="fas fa-lock" style="color:var(--palette-forest);"></i>
+        <span>SECURE HANDSHAKE [AES-256]</span>
+      </div>
       <canvas id="surveillanceCanvas"></canvas>
     </div>
   </div>
 
   <script>
+    // ────────────────────────────────────────────────────────
+    // Demo Credentials Auto-Fill Logic
+    // ────────────────────────────────────────────────────────
+    function fillDemoCredentials() {
+      const emailInput = document.getElementById("email");
+      const pwdInput = document.getElementById("password");
+      const autoBtn = document.getElementById("demoAutoFillBtn");
+
+      if (emailInput && pwdInput) {
+        emailInput.value = "admin@vigilanteye.com";
+        pwdInput.value = "password123";
+
+        // Trigger flash glow highlight animation
+        emailInput.classList.remove("input-autofilled");
+        pwdInput.classList.remove("input-autofilled");
+        void emailInput.offsetWidth; // Force DOM reflow
+        void pwdInput.offsetWidth;
+        emailInput.classList.add("input-autofilled");
+        pwdInput.classList.add("input-autofilled");
+
+        // Temporary feedback on button
+        if (autoBtn) {
+          autoBtn.classList.add("filled");
+          autoBtn.innerHTML = '<i class="fas fa-check"></i> Filled!';
+          setTimeout(() => {
+            autoBtn.classList.remove("filled");
+            autoBtn.innerHTML = '<i class="fas fa-magic"></i> Auto-Fill';
+          }, 3000);
+        }
+      }
+    }
+
+    const demoAutoFillBtn = document.getElementById("demoAutoFillBtn");
+    if (demoAutoFillBtn) {
+      demoAutoFillBtn.addEventListener("click", function (e) {
+        e.stopPropagation();
+        fillDemoCredentials();
+      });
+    }
+
+    const demoAccessCard = document.getElementById("demoAccessCard");
+    if (demoAccessCard) {
+      demoAccessCard.addEventListener("click", function () {
+        fillDemoCredentials();
+      });
+    }
+
     // ────────────────────────────────────────────────────────
     // Form handlers
     // ────────────────────────────────────────────────────────
@@ -521,7 +894,7 @@
 
     function handleCredentialResponse(response) {
       const googleBtn = document.getElementById("googleBtnContainer");
-      googleBtn.innerHTML = '<div style="color: #00c8ff; font-weight: 600;"><span class="spinner"></span>Authenticating session...</div>';
+      googleBtn.innerHTML = '<div style="color: #D96868; font-weight: 700;"><span class="spinner"></span>Authenticating session...</div>';
       
       fetch("/auth/google-login", {
         method: "POST",
@@ -568,9 +941,9 @@
         // Google Client ID not configured — show an informational notice (no mock buttons)
         const container = document.getElementById("googleBtnContainer");
         container.innerHTML = `
-          <div style="width:100%;max-width:330px;padding:12px 16px;background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.08);border-radius:8px;color:rgba(255,255,255,0.3);font-family:'Outfit',sans-serif;font-size:0.82rem;display:flex;align-items:center;gap:10px;">
+          <div style="width:100%;max-width:330px;padding:12px 16px;background:#FFFFFF;border:2px solid rgba(145, 174, 110, 0.45);border-radius:10px;color:#1F2421;font-family:'Outfit',sans-serif;font-size:0.84rem;font-weight:700;display:flex;align-items:center;gap:10px;">
             <svg style="width:16px;height:16px;flex-shrink:0;" viewBox="0 0 24 24">
-              <path fill="rgba(255,255,255,0.3)" d="M12.24 10.285V14.4h6.887c-.648 2.41-2.519 4.114-5.136 4.114A5.856 5.856 0 0 1 8.1 12.657a5.856 5.856 0 0 1 5.89-5.858c1.454 0 2.782.532 3.804 1.411l3.056-3.055C18.948 3.312 16.632 2 13.99 2 8.474 2 4 6.474 4 12s4.474 10 9.99 10c6.046 0 9.61-4.248 8.878-10.286H12.24Z"/>
+              <path fill="#D96868" d="M12.24 10.285V14.4h6.887c-.648 2.41-2.519 4.114-5.136 4.114A5.856 5.856 0 0 1 8.1 12.657a5.856 5.856 0 0 1 5.89-5.858c1.454 0 2.782.532 3.804 1.411l3.056-3.055C18.948 3.312 16.632 2 13.99 2 8.474 2 4 6.474 4 12s4.474 10 9.99 10c6.046 0 9.61-4.248 8.878-10.286H12.24Z"/>
             </svg>
             <span>Google Sign-In not configured</span>
           </div>
@@ -579,563 +952,688 @@
     };
 
     // ────────────────────────────────────────────────────────
-    // Lightweight 3D Surveillance Camera Canvas Animation
+    // Real 3D Photorealistic CCTV Surveillance Camera (Three.js WebGL)
+    // Engineered with 40+ Years Senior Visual & 3D Architectural Standards
+    // Zoomed-Out Framing • Procedural Brushed Metal • Anti-Reflective Optics
     // ────────────────────────────────────────────────────────
-    
-    const canvas = document.getElementById("surveillanceCanvas");
-    const ctx = canvas.getContext("2d");
+    (function initRealistic3DCCTV() {
+      const container = document.querySelector('.login-right');
+      const canvas = document.getElementById('surveillanceCanvas');
+      if (!container || !canvas || typeof THREE === 'undefined') return;
 
-    let width = 0;
-    let height = 0;
+      // 1. Scene & Camera Setup (Zoomed-Out Balanced Perspective)
+      const scene = new THREE.Scene();
 
-    function resize() {
-      const rect = canvas.parentNode.getBoundingClientRect();
-      width = rect.width;
-      height = rect.height;
-      canvas.width = width * window.devicePixelRatio;
-      canvas.height = height * window.devicePixelRatio;
-      ctx.scale(window.devicePixelRatio, window.devicePixelRatio);
-    }
-    
-    window.addEventListener("resize", resize);
-    resize();
+      // Perspective camera positioned with comfortable negative space (Z = 28 for balanced zoom)
+      const camera = new THREE.PerspectiveCamera(34, container.clientWidth / container.clientHeight, 0.1, 1000);
+      camera.position.set(0, 0.2, 28);
 
-    // 3D Point rotations
-    function rotateX(p, sin, cos) {
-      return {
-        x: p.x,
-        y: p.y * cos - p.z * sin,
-        z: p.y * sin + p.z * cos
-      };
-    }
-
-    function rotateY(p, sin, cos) {
-      return {
-        x: p.x * cos + p.z * sin,
-        y: p.y,
-        z: -p.x * sin + p.z * cos
-      };
-    }
-
-    // Apply rotation and project
-    function transformAndProject(p, pan, tilt, scale, dist) {
-      const rPan = (pan * Math.PI) / 180;
-      const rTilt = (tilt * Math.PI) / 180;
-      
-      const sPan = Math.sin(rPan), cPan = Math.cos(rPan);
-      const sTilt = Math.sin(rTilt), cTilt = Math.cos(rTilt);
-      
-      // Rotate around X (tilt) then Y (pan)
-      let pRot = rotateX(p, sTilt, cTilt);
-      pRot = rotateY(pRot, sPan, cPan);
-      
-      // Perspective projection
-      const zProj = pRot.z + dist;
-      return {
-        x: (pRot.x * scale) / zProj + width / 2,
-        y: (pRot.y * scale) / zProj + height / 2,
-        z: zProj
-      };
-    }
-
-    // 3D coordinates around camera origin (0,0,0)
-    const cameraGeometry = {
-      mount: [],
-      arm: [
-        {x: -60, y: -40, z: -100},
-        {x: -25, y: -25, z: -80},
-        {x: 0, y: 0, z: -50},
-        {x: 0, y: 0, z: 0}
-      ],
-      bodyFront: [],
-      bodyBack: [],
-      lens: [],
-      hood: [
-        {x: -20, y: -20, z: -40},
-        {x: 20, y: -20, z: -40},
-        {x: 24, y: -24, z: 45},
-        {x: -24, y: -24, z: 45}
-      ]
-    };
-
-    // Generate circular geometry rings
-    const bodyR = 16;
-    const lensR = 11;
-    const segmentsCount = 10;
-    for (let i = 0; i < segmentsCount; i++) {
-      const theta = (i / segmentsCount) * Math.PI * 2;
-      const cos = Math.cos(theta);
-      const sin = Math.sin(theta);
-      
-      cameraGeometry.bodyFront.push({ x: cos * bodyR, y: sin * bodyR, z: 35 });
-      cameraGeometry.bodyBack.push({ x: cos * bodyR, y: sin * bodyR, z: -50 });
-      cameraGeometry.lens.push({ x: cos * lensR, y: sin * lensR, z: 37 });
-      cameraGeometry.mount.push({ x: -60 + cos * 15, y: -40 + sin * 15, z: -100 });
-    }
-
-    // Interactive target scanning simulation
-    const trackingTarget = { x: 0, y: 0, z: 220 };
-    let currentPan = 0;
-    let currentTilt = 0;
-
-    // Atmospheric particles in 3D
-    const particles = [];
-    for (let i = 0; i < 60; i++) {
-      particles.push({
-        x: (Math.random() - 0.5) * 400,
-        y: (Math.random() - 0.5) * 300,
-        z: Math.random() * 300 + 40,
-        r: Math.random() * 1.5 + 0.5,
-        speed: Math.random() * 0.4 + 0.1
+      const renderer = new THREE.WebGLRenderer({
+        canvas: canvas,
+        alpha: true,
+        antialias: true,
+        powerPreference: "high-performance"
       });
-    }
+      renderer.setSize(container.clientWidth, container.clientHeight);
+      renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+      renderer.toneMapping = THREE.ACESFilmicToneMapping;
+      renderer.toneMappingExposure = 1.25;
+      renderer.shadowMap.enabled = true;
+      renderer.shadowMap.type = THREE.PCFSoftShadowMap;
 
-    // Surveillance mode state machine
-    let activeMode = "search"; // "search" (white), "scan" (green), "lock" (red)
-    let modeTimer = 0;
-
-    function renderLoop() {
-      // Clear with dark futuristic surveillance gradient background
-      const grad = ctx.createRadialGradient(width/2, height/2, 50, width/2, height/2, Math.max(width, height));
-      grad.addColorStop(0, "#081622");
-      grad.addColorStop(0.5, "#040b12");
-      grad.addColorStop(1, "#010408");
-      ctx.fillStyle = grad;
-      ctx.fillRect(0, 0, width, height);
-
-      // Draw cyber grid background inside animation pane with ice-cyan
-      ctx.strokeStyle = "rgba(166, 227, 233, 0.035)";
-      ctx.lineWidth = 1;
-      const gridSize = 40;
-      for (let x = 0; x < width; x += gridSize) {
-        ctx.beginPath();
-        ctx.moveTo(x, 0);
-        ctx.lineTo(x, height);
-        ctx.stroke();
-      }
-      for (let y = 0; y < height; y += gridSize) {
-        ctx.beginPath();
-        ctx.moveTo(0, y);
-        ctx.lineTo(width, y);
-        ctx.stroke();
-      }
-
-      const time = Date.now();
-      
-      // State machine triggers
-      modeTimer += 16.7;
-      if (activeMode === "search" && modeTimer > 5000) {
-        activeMode = "scan";
-        modeTimer = 0;
-      } else if (activeMode === "scan" && modeTimer > 5000) {
-        activeMode = "lock";
-        modeTimer = 0;
-      } else if (activeMode === "lock" && modeTimer > 3500) {
-        activeMode = "search";
-        modeTimer = 0;
-      }
-
-      // Define scan beam colors based on mode (using Ice Cyan palette)
-      let themeColor = "rgba(227, 253, 253, 0.18)";
-      let strokeColor = "rgba(166, 227, 233, 0.85)";
-      let beamColorGradientStart = "rgba(113, 201, 206, 0.28)";
-      if (activeMode === "scan") {
-        themeColor = "rgba(113, 201, 206, 0.25)";
-        strokeColor = "rgba(166, 227, 233, 0.95)";
-        beamColorGradientStart = "rgba(113, 201, 206, 0.38)";
-      } else if (activeMode === "lock") {
-        themeColor = "rgba(255, 77, 109, 0.25)";
-        strokeColor = "rgba(255, 77, 109, 0.85)";
-        beamColorGradientStart = "rgba(255, 77, 109, 0.32)";
-      }
-
-      // Smooth float movement coordinates
-      const floatX = Math.sin(time * 0.001) * 8;
-      const floatY = Math.cos(time * 0.0008) * 12;
-
-      // Animate tracking target in 3D space
-      if (activeMode === "lock") {
-        trackingTarget.x = Math.sin(time * 0.0006) * 120 + Math.sin(time * 0.02) * 2;
-        trackingTarget.y = Math.cos(time * 0.0005) * 50 + Math.sin(time * 0.02) * 2;
-        trackingTarget.z = 210 + Math.sin(time * 0.002) * 10;
-      } else {
-        trackingTarget.x = Math.sin(time * 0.0005) * 160;
-        trackingTarget.y = Math.cos(time * 0.0003) * 80;
-        trackingTarget.z = 220 + Math.sin(time * 0.0006) * 30;
-      }
-
-      // Camera calculations to target coords
-      const dx = trackingTarget.x - floatX;
-      const dy = trackingTarget.y - floatY;
-      const dz = trackingTarget.z;
-      const targetPan = Math.atan2(dx, dz) * 180 / Math.PI;
-      const targetTilt = -Math.atan2(dy, Math.sqrt(dx * dx + dz * dz)) * 180 / Math.PI;
-
-      // Lerp camera angles
-      currentPan += (targetPan - currentPan) * 0.045;
-      currentTilt += (targetTilt - currentTilt) * 0.045;
-
-      const scale = 360;
-      const dist = 220;
-
-      // ────────────────────────────────────────────────────────
-      // Render Static Mounting base & fixed arm joints
-      // ────────────────────────────────────────────────────────
-      const projMount = cameraGeometry.mount.map(p => {
-        return {
-          x: (p.x * scale) / (p.z + dist) + width / 2,
-          y: (p.y * scale) / (p.z + dist) + height / 2
-        };
-      });
-
-      // Draw Mount plate
-      ctx.beginPath();
-      ctx.moveTo(projMount[0].x, projMount[0].y);
-      for (let i = 1; i < projMount.length; i++) ctx.lineTo(projMount[i].x, projMount[i].y);
-      ctx.closePath();
-      ctx.strokeStyle = "rgba(113, 201, 206, 0.25)";
-      ctx.lineWidth = 2;
-      ctx.stroke();
-      ctx.fillStyle = "rgba(8, 22, 34, 0.35)";
-      ctx.fill();
-
-      // Proj Arm Joint points
-      const projArm = cameraGeometry.arm.map(p => {
-        return {
-          x: (p.x * scale) / (p.z + dist) + width / 2 + floatX,
-          y: (p.y * scale) / (p.z + dist) + height / 2 + floatY
-        };
-      });
-
-      // Draw arm joints
-      ctx.beginPath();
-      ctx.moveTo(projMount[0].x + 15, projMount[0].y + 15);
-      projArm.forEach(p => ctx.lineTo(p.x, p.y));
-      ctx.strokeStyle = "rgba(113, 201, 206, 0.35)";
-      ctx.lineWidth = 6;
-      ctx.stroke();
-
-      // ────────────────────────────────────────────────────────
-      // Render Camera Body (Swiveling mesh)
-      // ────────────────────────────────────────────────────────
-      const projFront = cameraGeometry.bodyFront.map(p => {
-        let pOffset = { x: p.x + floatX, y: p.y + floatY, z: p.z };
-        return transformAndProject(pOffset, currentPan, currentTilt, scale, dist);
-      });
-      const projBack = cameraGeometry.bodyBack.map(p => {
-        let pOffset = { x: p.x + floatX, y: p.y + floatY, z: p.z };
-        return transformAndProject(pOffset, currentPan, currentTilt, scale, dist);
-      });
-      const projLens = cameraGeometry.lens.map(p => {
-        let pOffset = { x: p.x + floatX, y: p.y + floatY, z: p.z };
-        return transformAndProject(pOffset, currentPan, currentTilt, scale, dist);
-      });
-      const projHood = cameraGeometry.hood.map(p => {
-        let pOffset = { x: p.x + floatX, y: p.y + floatY, z: p.z };
-        return transformAndProject(pOffset, currentPan, currentTilt, scale, dist);
-      });
-
-      // Draw Cylinder wireframe & semi-transparent faces
-      ctx.fillStyle = "rgba(7, 20, 30, 0.5)";
-      ctx.strokeStyle = "rgba(113, 201, 206, 0.45)";
-      ctx.lineWidth = 1.5;
-
-      // Draw Back ring face
-      ctx.beginPath();
-      ctx.moveTo(projBack[0].x, projBack[0].y);
-      for (let i = 1; i < projBack.length; i++) ctx.lineTo(projBack[i].x, projBack[i].y);
-      ctx.closePath();
-      ctx.stroke();
-      ctx.fill();
-
-      // Draw cylinder columns
-      for (let i = 0; i < segmentsCount; i++) {
-        ctx.beginPath();
-        ctx.moveTo(projBack[i].x, projBack[i].y);
-        ctx.lineTo(projFront[i].x, projFront[i].y);
-        ctx.stroke();
-      }
-
-      // Draw Front ring face
-      ctx.beginPath();
-      ctx.moveTo(projFront[0].x, projFront[0].y);
-      for (let i = 1; i < projFront.length; i++) ctx.lineTo(projFront[i].x, projFront[i].y);
-      ctx.closePath();
-      ctx.stroke();
-      ctx.fill();
-
-      // Draw Lens ring face
-      ctx.beginPath();
-      ctx.moveTo(projLens[0].x, projLens[0].y);
-      for (let i = 1; i < projLens.length; i++) ctx.lineTo(projLens[i].x, projLens[i].y);
-      ctx.closePath();
-      ctx.strokeStyle = "rgba(166, 227, 233, 0.85)";
-      ctx.stroke();
-      ctx.fillStyle = "rgba(113, 201, 206, 0.22)";
-      ctx.fill();
-
-      // Draw Lens center glow core
-      const lensCenter = transformAndProject({x: floatX, y: floatY, z: 37}, currentPan, currentTilt, scale, dist);
-      const lensGlow = ctx.createRadialGradient(lensCenter.x, lensCenter.y, 2, lensCenter.x, lensCenter.y, 14);
-      lensGlow.addColorStop(0, strokeColor);
-      lensGlow.addColorStop(0.5, themeColor);
-      lensGlow.addColorStop(1, "rgba(0, 0, 0, 0)");
-      ctx.fillStyle = lensGlow;
-      ctx.beginPath();
-      ctx.arc(lensCenter.x, lensCenter.y, 14, 0, Math.PI*2);
-      ctx.fill();
-
-      // Draw Sun shield/hood
-      ctx.beginPath();
-      ctx.moveTo(projHood[0].x, projHood[0].y);
-      ctx.lineTo(projHood[1].x, projHood[1].y);
-      ctx.lineTo(projHood[2].x, projHood[2].y);
-      ctx.lineTo(projHood[3].x, projHood[3].y);
-      ctx.closePath();
-      ctx.strokeStyle = "rgba(166, 227, 233, 0.55)";
-      ctx.fillStyle = "rgba(4, 14, 22, 0.8)";
-      ctx.fill();
-      ctx.stroke();
-
-      // Draw Blinking LED indicator
-      const ledPoint = transformAndProject({x: floatX, y: floatY - 10, z: 35}, currentPan, currentTilt, scale, dist);
-      const ledBlinkOn = activeMode === "lock" ? (time % 300 < 150) : (time % 1200 < 600);
-      if (ledBlinkOn) {
-        ctx.beginPath();
-        ctx.arc(ledPoint.x, ledPoint.y, 2.5, 0, Math.PI * 2);
-        ctx.fillStyle = "#ff3b3b";
-        ctx.shadowBlur = 10;
-        ctx.shadowColor = "#ff3b3b";
-        ctx.fill();
-        ctx.shadowBlur = 0; // reset
-      }
-
-      // ────────────────────────────────────────────────────────
-      // Render Scanning/Searchlight Beams
-      // ────────────────────────────────────────────────────────
-      const projTarget = {
-        x: (trackingTarget.x * scale) / (trackingTarget.z + dist) + width / 2,
-        y: (trackingTarget.y * scale) / (trackingTarget.z + dist) + height / 2
-      };
-
-      // Draw sweeping light cone
-      const beamGrad = ctx.createLinearGradient(lensCenter.x, lensCenter.y, projTarget.x, projTarget.y);
-      beamGrad.addColorStop(0, beamColorGradientStart);
-      beamGrad.addColorStop(0.3, themeColor);
-      beamGrad.addColorStop(1, "rgba(0, 0, 0, 0)");
-
-      // Determine beam edges (perpendicular to beam direction)
-      const beamAngle = Math.atan2(projTarget.y - lensCenter.y, projTarget.x - lensCenter.x);
-      const spreadR = activeMode === "lock" ? 40 : 90;
-      const beamDx = Math.sin(beamAngle) * spreadR;
-      const beamDy = -Math.cos(beamAngle) * spreadR;
-
-      ctx.fillStyle = beamGrad;
-      ctx.beginPath();
-      ctx.moveTo(lensCenter.x, lensCenter.y);
-      ctx.lineTo(projTarget.x + beamDx, projTarget.y + beamDy);
-      ctx.lineTo(projTarget.x - beamDx, projTarget.y - beamDy);
-      ctx.closePath();
-      ctx.fill();
-
-      // Draw volumetric beam lines
-      ctx.strokeStyle = themeColor;
-      ctx.lineWidth = 1;
-      ctx.beginPath();
-      ctx.moveTo(lensCenter.x, lensCenter.y);
-      ctx.lineTo(projTarget.x + beamDx, projTarget.y + beamDy);
-      ctx.moveTo(lensCenter.x, lensCenter.y);
-      ctx.lineTo(projTarget.x - beamDx, projTarget.y - beamDy);
-      ctx.stroke();
-
-      // Draw scanning spot grid / laser target circles
-      const spotGrad = ctx.createRadialGradient(projTarget.x, projTarget.y, 5, projTarget.x, projTarget.y, spreadR);
-      spotGrad.addColorStop(0, themeColor);
-      spotGrad.addColorStop(1, "rgba(0, 0, 0, 0)");
-      ctx.fillStyle = spotGrad;
-      ctx.beginPath();
-      ctx.arc(projTarget.x, projTarget.y, spreadR, 0, Math.PI * 2);
-      ctx.fill();
-
-      if (activeMode === "scan") {
-        // Draw cyber scanner grid inside spot
-        ctx.strokeStyle = "rgba(166, 227, 233, 0.35)";
-        ctx.lineWidth = 1;
-        ctx.save();
-        ctx.beginPath();
-        ctx.arc(projTarget.x, projTarget.y, spreadR, 0, Math.PI * 2);
-        ctx.clip();
-        
-        // Horizontal laser lines
-        for (let gy = projTarget.y - spreadR; gy < projTarget.y + spreadR; gy += 15) {
+      // 2. Procedural Brushed Metal Micro-Texture Generator
+      function generateBrushedMetalTexture() {
+        const c = document.createElement('canvas');
+        c.width = 256;
+        c.height = 256;
+        const ctx = c.getContext('2d');
+        ctx.fillStyle = '#808080';
+        ctx.fillRect(0, 0, 256, 256);
+        for (let i = 0; i < 4500; i++) {
+          const x = Math.random() * 256;
+          const y = Math.random() * 256;
+          const len = Math.random() * 35 + 8;
+          const shade = Math.floor(Math.random() * 50 - 25 + 128);
+          ctx.strokeStyle = `rgba(${shade}, ${shade}, ${shade}, 0.16)`;
+          ctx.lineWidth = 1;
           ctx.beginPath();
-          ctx.moveTo(projTarget.x - spreadR, gy);
-          ctx.lineTo(projTarget.x + spreadR, gy);
+          ctx.moveTo(x, y);
+          ctx.lineTo(x + len, y);
           ctx.stroke();
         }
-        
-        // Scan laser line sweep
-        const sweepY = projTarget.y - spreadR + ((time * 0.08) % (spreadR * 2));
-        ctx.strokeStyle = "rgba(203, 241, 245, 0.85)";
-        ctx.lineWidth = 2;
-        ctx.shadowBlur = 8;
-        ctx.shadowColor = "#71C9CE";
-        ctx.beginPath();
-        ctx.moveTo(projTarget.x - spreadR, sweepY);
-        ctx.lineTo(projTarget.x + spreadR, sweepY);
-        ctx.stroke();
-        ctx.shadowBlur = 0;
-        ctx.restore();
-      } else if (activeMode === "lock") {
-        // Red Target tracking HUD graphics
-        ctx.strokeStyle = "rgba(255, 60, 60, 0.8)";
-        ctx.lineWidth = 1.5;
-        
-        // Outer target box
-        const boxS = 35;
-        ctx.beginPath();
-        // Top Left Bracket
-        ctx.moveTo(projTarget.x - boxS, projTarget.y - boxS + 10);
-        ctx.lineTo(projTarget.x - boxS, projTarget.y - boxS);
-        ctx.lineTo(projTarget.x - boxS + 10, projTarget.y - boxS);
-        // Top Right Bracket
-        ctx.moveTo(projTarget.x + boxS, projTarget.y - boxS + 10);
-        ctx.lineTo(projTarget.x + boxS, projTarget.y - boxS);
-        ctx.lineTo(projTarget.x + boxS - 10, projTarget.y - boxS);
-        // Bottom Left Bracket
-        ctx.moveTo(projTarget.x - boxS, projTarget.y + boxS - 10);
-        ctx.lineTo(projTarget.x - boxS, projTarget.y + boxS);
-        ctx.lineTo(projTarget.x - boxS + 10, projTarget.y + boxS);
-        // Bottom Right Bracket
-        ctx.moveTo(projTarget.x + boxS, projTarget.y + boxS - 10);
-        ctx.lineTo(projTarget.x + boxS, projTarget.y + boxS);
-        ctx.lineTo(projTarget.x + boxS - 10, projTarget.y + boxS);
-        ctx.stroke();
-
-        // Target crosshair lines
-        ctx.strokeStyle = "rgba(255, 60, 60, 0.45)";
-        ctx.beginPath();
-        ctx.moveTo(projTarget.x - boxS - 10, projTarget.y);
-        ctx.lineTo(projTarget.x - 8, projTarget.y);
-        ctx.moveTo(projTarget.x + 8, projTarget.y);
-        ctx.lineTo(projTarget.x + boxS + 10, projTarget.y);
-        ctx.moveTo(projTarget.x, projTarget.y - boxS - 10);
-        ctx.lineTo(projTarget.x, projTarget.y - 8);
-        ctx.moveTo(projTarget.x, projTarget.y + 8);
-        ctx.lineTo(projTarget.x, projTarget.y + boxS + 10);
-        ctx.stroke();
-
-        // Lock text
-        ctx.fillStyle = "#ff4d4d";
-        ctx.font = "bold 9px 'Courier New',monospace";
-        ctx.textAlign = "center";
-        ctx.fillText("TARGET LOCKED", projTarget.x, projTarget.y - boxS - 15);
-        ctx.fillText("MATCH: 98.4%", projTarget.x, projTarget.y + boxS + 15);
+        const tex = new THREE.CanvasTexture(c);
+        tex.wrapS = THREE.RepeatWrapping;
+        tex.wrapT = THREE.RepeatWrapping;
+        tex.repeat.set(2, 2);
+        return tex;
       }
+      const brushedTex = generateBrushedMetalTexture();
 
-      // ────────────────────────────────────────────────────────
-      // Render Atmospheric Dust Particles
-      // ────────────────────────────────────────────────────────
-      particles.forEach(p => {
-        // Drift movement
-        p.z -= p.speed;
-        if (p.z <= 5) {
-          p.z = 300;
-          p.x = (Math.random() - 0.5) * 400;
-          p.y = (Math.random() - 0.5) * 300;
-        }
+      // Procedural Laser-Engraved Markings Badge
+      function generateMarkingsTexture() {
+        const c = document.createElement('canvas');
+        c.width = 512;
+        c.height = 128;
+        const ctx = c.getContext('2d');
+        ctx.clearRect(0, 0, 512, 128);
+        ctx.fillStyle = '#F2F2F2';
+        ctx.font = 'bold 24px "Outfit", sans-serif';
+        ctx.fillText('VIGILANT EYE OPTICS', 24, 46);
+        ctx.fillStyle = '#D96868';
+        ctx.font = 'bold 18px "Outfit", sans-serif';
+        ctx.fillText('4K ULTRA-HD • AI THEFT SENTINEL', 24, 76);
+        ctx.fillStyle = '#91AE6E';
+        ctx.font = '14px monospace';
+        ctx.fillText('IP67 WEATHERPROOF • F/1.4 50mm IRIS', 24, 104);
+        const tex = new THREE.CanvasTexture(c);
+        return tex;
+      }
+      const markingsTex = generateMarkingsTexture();
 
-        const pProj = {
-          x: (p.x * scale) / (p.z + dist) + width / 2,
-          y: (p.y * scale) / (p.z + dist) + height / 2
-        };
-
-        // Out of screen filter
-        if (pProj.x < 0 || pProj.x > width || pProj.y < 0 || pProj.y > height) return;
-
-        // Vector math: determine if particle lies within the 3D scanning beam cone
-        const vPart = { x: p.x, y: p.y, z: p.z };
-        const lenPart = Math.sqrt(vPart.x*vPart.x + vPart.y*vPart.y + vPart.z*vPart.z);
-        const vTarg = { x: trackingTarget.x - floatX, y: trackingTarget.y - floatY, z: trackingTarget.z };
-        const lenTarg = Math.sqrt(vTarg.x*vTarg.x + vTarg.y*vTarg.y + vTarg.z*vTarg.z);
-
-        const dot = vPart.x * vTarg.x + vPart.y * vTarg.y + vPart.z * vTarg.z;
-        const cosAngle = dot / (lenPart * lenTarg);
-        
-        const insideBeam = cosAngle > 0.97;
-
-        let alpha = 0.08;
-        let size = p.r * (150 / (p.z + dist));
-        let col = "rgba(227, 253, 253, ";
-
-        if (insideBeam) {
-          alpha = 0.6;
-          size *= 1.8;
-          if (activeMode === "scan") col = "rgba(166, 227, 233, ";
-          else if (activeMode === "lock") col = "rgba(255, 70, 70, ";
-        }
-
-        ctx.fillStyle = col + alpha + ")";
-        ctx.beginPath();
-        ctx.arc(pProj.x, pProj.y, Math.max(0.5, size), 0, Math.PI * 2);
-        ctx.fill();
+      // 3. Photorealistic PBR Material Library
+      // Satin Powder-Coated Gunmetal Chassis with Micro-Brushing
+      const chassisDarkMat = new THREE.MeshStandardMaterial({
+        color: 0x161A17,
+        metalness: 0.90,
+        roughness: 0.30,
+        roughnessMap: brushedTex
       });
 
-      // ────────────────────────────────────────────────────────
-      // Render HUD Overlays & Cyber Readouts
-      // ────────────────────────────────────────────────────────
-      ctx.strokeStyle = "rgba(113, 201, 206, 0.25)";
-      ctx.lineWidth = 1;
-      
-      // Render HUD corners
-      const pad = 20;
-      ctx.beginPath();
-      // Top Left Corner Bracket
-      ctx.moveTo(pad + 15, pad); ctx.lineTo(pad, pad); ctx.lineTo(pad, pad + 15);
-      // Top Right Corner Bracket
-      ctx.moveTo(width - pad - 15, pad); ctx.lineTo(width - pad, pad); ctx.lineTo(width - pad, pad + 15);
-      // Bottom Left Corner Bracket
-      ctx.moveTo(pad + 15, height - pad); ctx.lineTo(pad, height - pad); ctx.lineTo(pad, height - pad + 15);
-      // Bottom Right Corner Bracket
-      ctx.moveTo(width - pad - 15, height - pad); ctx.lineTo(width - pad, height - pad); ctx.lineTo(width - pad, height - pad + 15);
-      ctx.stroke();
+      // Machined Aircraft Aluminum (Arm, Brackets, Gimbals)
+      const machinedAlumMat = new THREE.MeshStandardMaterial({
+        color: 0x242A25,
+        metalness: 0.95,
+        roughness: 0.22,
+        roughnessMap: brushedTex
+      });
 
-      // Top Left Text
-      ctx.fillStyle = "rgba(166, 227, 233, 0.8)";
-      ctx.font = "bold 9px 'Outfit', sans-serif";
-      ctx.textAlign = "left";
-      ctx.fillText("VIGILANT EYE SURVEILLANCE FEED", pad + 10, pad + 15);
-      ctx.fillStyle = "rgba(203, 241, 245, 0.6)";
-      ctx.fillText("FEED STATE: ACTIVE_STREAM", pad + 10, pad + 27);
-      ctx.fillText("FPS: 60.0 (GPU_ACCEL)", pad + 10, pad + 39);
+      // CNC Anodized Coral Accent (Palette: #D96868)
+      const anodizedCoralMat = new THREE.MeshStandardMaterial({
+        color: 0xD96868,
+        metalness: 0.75,
+        roughness: 0.24,
+        roughnessMap: brushedTex,
+        emissive: 0x3d1414,
+        emissiveIntensity: 0.3
+      });
 
-      // Top Right Text
-      ctx.textAlign = "right";
-      ctx.fillStyle = "rgba(166, 227, 233, 0.8)";
-      ctx.fillText("SYSTEM CORE: SECURE_ON", width - pad - 10, pad + 15);
-      ctx.fillStyle = strokeColor;
-      ctx.fillText(`AI_DETECTOR: ${activeMode.toUpperCase()}_MODE`, width - pad - 10, pad + 27);
-      ctx.fillStyle = "rgba(203, 241, 245, 0.6)";
-      ctx.fillText("CORE PIPELINE: YOLOv8n", width - pad - 10, pad + 39);
+      // CNC Anodized Forest Accent (Palette: #689D4B)
+      const anodizedForestMat = new THREE.MeshStandardMaterial({
+        color: 0x689D4B,
+        metalness: 0.72,
+        roughness: 0.26,
+        roughnessMap: brushedTex,
+        emissive: 0x14220e,
+        emissiveIntensity: 0.25
+      });
 
-      // Bottom Left Text: Azimuth & Elevation Angles
-      ctx.textAlign = "left";
-      ctx.fillStyle = "rgba(166, 227, 233, 0.8)";
-      ctx.fillText(`CAM_AZIMUTH:   ${currentPan > 0 ? "+" : ""}${currentPan.toFixed(1)}°`, pad + 10, height - pad - 25);
-      ctx.fillText(`CAM_ELEVATION: ${currentTilt > 0 ? "+" : ""}${currentTilt.toFixed(1)}°`, pad + 10, height - pad - 13);
+      // Multi-Coated Anti-Reflective Optical Glass Element
+      const opticalGlassMat = new THREE.MeshPhysicalMaterial({
+        color: 0x05100c,
+        metalness: 0.08,
+        roughness: 0.02,
+        transmission: 0.97,
+        transparent: true,
+        opacity: 0.94,
+        reflectivity: 0.98,
+        clearcoat: 1.0,
+        clearcoatRoughness: 0.03
+      });
 
-      // Bottom Right Text: Dynamic Clock
-      ctx.textAlign = "right";
-      ctx.fillStyle = "rgba(203, 241, 245, 0.65)";
-      const d = new Date();
-      const timeString = d.toISOString().replace("T", " ").substring(0, 19);
-      ctx.fillText(timeString + " UTC", width - pad - 10, height - pad - 13);
+      // Infrared Night-Vision LED Matrix Diodes
+      const irLedMat = new THREE.MeshStandardMaterial({
+        color: 0xff3333,
+        emissive: 0xff1515,
+        emissiveIntensity: 2.4,
+        roughness: 0.2
+      });
 
-      requestAnimationFrame(renderLoop);
-    }
+      // Optical Iris Core with Emerald Sensor Glint
+      const sensorCoreMat = new THREE.MeshStandardMaterial({
+        color: 0x040805,
+        roughness: 0.12,
+        emissive: 0x689D4B,
+        emissiveIntensity: 0.55
+      });
 
-    // Launch Loop
-    renderLoop();
+      // Active Recording Tally Light
+      const tallyLightMat = new THREE.MeshBasicMaterial({ color: 0x689D4B });
+
+      // Flexible Corrugated Wiring Conduit
+      const conduitCableMat = new THREE.MeshStandardMaterial({
+        color: 0x0c0f0d,
+        roughness: 0.85,
+        metalness: 0.15
+      });
+
+      // 4. Camera Master Rig Architecture (Anchored in Upper-Right Quadrant)
+      const cameraRig = new THREE.Group();
+      cameraRig.position.set(0.6, 0.2, 0);
+      scene.add(cameraRig);
+
+      // Industrial Wall / Ceiling Mounting Flange
+      const mountFlange = new THREE.Mesh(new THREE.CylinderGeometry(1.6, 1.85, 0.4, 32), machinedAlumMat);
+      mountFlange.position.set(4.4, 4.0, -3.4);
+      mountFlange.rotation.z = Math.PI / 4;
+      mountFlange.rotation.x = Math.PI / 6;
+      mountFlange.castShadow = true;
+      mountFlange.receiveShadow = true;
+      cameraRig.add(mountFlange);
+
+      // Flange Hexagonal Stainless Steel Anchor Bolts
+      for (let i = 0; i < 4; i++) {
+        const boltAngle = (i / 4) * Math.PI * 2;
+        const bolt = new THREE.Mesh(new THREE.CylinderGeometry(0.12, 0.12, 0.5, 12), machinedAlumMat);
+        bolt.position.set(
+          4.4 + Math.cos(boltAngle) * 1.18,
+          4.0 + Math.sin(boltAngle) * 1.18,
+          -3.35
+        );
+        bolt.rotation.x = Math.PI / 6;
+        cameraRig.add(bolt);
+      }
+
+      // Ball Pivot Socket & Knurled Locking Knob
+      const ballSocket = new THREE.Mesh(new THREE.SphereGeometry(0.88, 32, 32), chassisDarkMat);
+      ballSocket.position.set(4.0, 3.6, -3.0);
+      ballSocket.castShadow = true;
+      cameraRig.add(ballSocket);
+
+      const lockCollar = new THREE.Mesh(new THREE.TorusGeometry(0.92, 0.14, 16, 32), anodizedCoralMat);
+      lockCollar.position.set(4.0, 3.6, -3.0);
+      lockCollar.rotation.y = Math.PI / 3;
+      cameraRig.add(lockCollar);
+
+      // Knurled Hand-Tightening Thumbscrew on Pivot
+      const thumbScrew = new THREE.Mesh(new THREE.CylinderGeometry(0.24, 0.24, 0.4, 18), machinedAlumMat);
+      thumbScrew.position.set(4.7, 4.0, -2.8);
+      thumbScrew.rotation.z = Math.PI / 3;
+      cameraRig.add(thumbScrew);
+
+      // Articulated Hydraulic Cantilever Arm
+      const armCurve = new THREE.CylinderGeometry(0.44, 0.50, 4.8, 28);
+      const arm = new THREE.Mesh(armCurve, machinedAlumMat);
+      arm.position.set(2.4, 2.1, -1.6);
+      arm.rotation.z = Math.PI / 3.4;
+      arm.rotation.x = -Math.PI / 10;
+      arm.castShadow = true;
+      arm.receiveShadow = true;
+      cameraRig.add(arm);
+
+      // Arm Stress Rib Braces
+      const brace = new THREE.Mesh(new THREE.BoxGeometry(0.2, 3.4, 0.65), chassisDarkMat);
+      brace.position.set(2.4, 2.1, -1.6);
+      brace.rotation.z = Math.PI / 3.4;
+      brace.castShadow = true;
+      cameraRig.add(brace);
+
+      // Flexible Corrugated Wiring Conduit
+      const conduitCurve = new THREE.QuadraticBezierCurve3(
+        new THREE.Vector3(3.8, 3.2, -2.8),
+        new THREE.Vector3(1.6, 2.8, -3.0),
+        new THREE.Vector3(0.5, 0.1, -1.8)
+      );
+      const conduitGeom = new THREE.TubeGeometry(conduitCurve, 28, 0.09, 12, false);
+      const conduitMesh = new THREE.Mesh(conduitGeom, conduitCableMat);
+      conduitMesh.castShadow = true;
+      cameraRig.add(conduitMesh);
+
+      // 5. Robotic 2-Axis Precision Gimbal (Yaw & Pitch)
+      const gimbalYaw = new THREE.Group();
+      gimbalYaw.position.set(0.5, 0.1, 0);
+      cameraRig.add(gimbalYaw);
+
+      // Upper Swivel Turret Hub
+      const yawHub = new THREE.Mesh(new THREE.CylinderGeometry(0.78, 0.85, 0.85, 32), machinedAlumMat);
+      yawHub.position.set(0, 0.95, 0);
+      yawHub.castShadow = true;
+      gimbalYaw.add(yawHub);
+
+      // Azimuth Indexing Ring
+      const yawRing = new THREE.Mesh(new THREE.TorusGeometry(0.88, 0.055, 12, 36), anodizedForestMat);
+      yawRing.position.set(0, 0.75, 0);
+      yawRing.rotation.x = Math.PI / 2;
+      gimbalYaw.add(yawRing);
+
+      // Dual-Fork Yoke Arms (Sturdy U-Frame holding camera body)
+      const yokeL = new THREE.Mesh(new THREE.BoxGeometry(0.32, 1.9, 0.75), chassisDarkMat);
+      yokeL.position.set(-1.48, -0.05, 0);
+      yokeL.castShadow = true;
+      gimbalYaw.add(yokeL);
+
+      const yokeR = new THREE.Mesh(new THREE.BoxGeometry(0.32, 1.9, 0.75), chassisDarkMat);
+      yokeR.position.set(1.48, -0.05, 0);
+      yokeR.castShadow = true;
+      gimbalYaw.add(yokeR);
+
+      // Pitch Axis Assembly
+      const gimbalPitch = new THREE.Group();
+      gimbalPitch.position.set(0, -0.15, 0);
+      gimbalYaw.add(gimbalPitch);
+
+      // Anodized Pivot Bearing Caps with Hex Sockets
+      const pivotCapL = new THREE.Mesh(new THREE.CylinderGeometry(0.34, 0.34, 0.44, 24), anodizedCoralMat);
+      pivotCapL.rotation.z = Math.PI / 2;
+      pivotCapL.position.set(-1.44, 0, 0);
+      gimbalPitch.add(pivotCapL);
+
+      const pivotCapR = new THREE.Mesh(new THREE.CylinderGeometry(0.34, 0.34, 0.44, 24), anodizedCoralMat);
+      pivotCapR.rotation.z = Math.PI / 2;
+      pivotCapR.position.set(1.44, 0, 0);
+      gimbalPitch.add(pivotCapR);
+
+      // 6. Industrial Bullet Camera Housing & Optics
+      const cameraHead = new THREE.Group();
+      gimbalPitch.add(cameraHead);
+
+      // Main Bullet Cylindrical Body
+      const bodyLength = 4.3;
+      const bodyRadius = 1.25;
+      const bodyGeom = new THREE.CylinderGeometry(bodyRadius, bodyRadius * 1.03, bodyLength, 40);
+      const cameraBody = new THREE.Mesh(bodyGeom, chassisDarkMat);
+      cameraBody.rotation.x = Math.PI / 2;
+      cameraBody.castShadow = true;
+      cameraBody.receiveShadow = true;
+      cameraHead.add(cameraBody);
+
+      // Longitudinal Heat Sink Fins (Groove details along cylinder)
+      for (let i = 0; i < 8; i++) {
+        const finAngle = (i / 8) * Math.PI * 2;
+        const fin = new THREE.Mesh(new THREE.BoxGeometry(0.045, 0.085, bodyLength * 0.7), machinedAlumMat);
+        fin.position.set(
+          Math.cos(finAngle) * (bodyRadius + 0.02),
+          Math.sin(finAngle) * (bodyRadius + 0.02),
+          -0.1
+        );
+        fin.rotation.z = finAngle;
+        cameraHead.add(fin);
+      }
+
+      // Front Anodized Coral Accent Ring
+      const frontRing = new THREE.Mesh(new THREE.TorusGeometry(bodyRadius + 0.035, 0.058, 16, 48), anodizedCoralMat);
+      frontRing.position.set(0, 0, 1.0);
+      cameraHead.add(frontRing);
+
+      // Rear Anodized Forest Accent Ring
+      const rearRing = new THREE.Mesh(new THREE.TorusGeometry(bodyRadius + 0.035, 0.058, 16, 48), anodizedForestMat);
+      rearRing.position.set(0, 0, -1.2);
+      cameraHead.add(rearRing);
+
+      // Rear Weatherproof Dome Cap
+      const rearCap = new THREE.Mesh(new THREE.SphereGeometry(bodyRadius, 32, 16, 0, Math.PI * 2, 0, Math.PI / 2), machinedAlumMat);
+      rearCap.rotation.x = -Math.PI / 2;
+      rearCap.position.set(0, 0, -bodyLength / 2);
+      rearCap.castShadow = true;
+      cameraHead.add(rearCap);
+
+      // Cable Gland Entry on Rear
+      const cableGland = new THREE.Mesh(new THREE.CylinderGeometry(0.2, 0.25, 0.45, 16), chassisDarkMat);
+      cableGland.rotation.x = Math.PI / 2;
+      cableGland.position.set(0, -0.35, -bodyLength / 2 - 0.2);
+      cameraHead.add(cableGland);
+
+      // Wi-Fi / Tactical High-Gain Dual Antenna
+      const antBase = new THREE.Mesh(new THREE.CylinderGeometry(0.12, 0.15, 0.35, 16), machinedAlumMat);
+      antBase.position.set(0, bodyRadius + 0.1, -1.4);
+      cameraHead.add(antBase);
+
+      const antRod = new THREE.Mesh(new THREE.CylinderGeometry(0.04, 0.065, 2.8, 16), chassisDarkMat);
+      antRod.position.set(0, bodyRadius + 1.4, -1.7);
+      antRod.rotation.x = -Math.PI / 5;
+      cameraHead.add(antRod);
+
+      // Aerodynamic Protective Sun-Visor / Rain Hood
+      const visorGeom = new THREE.CylinderGeometry(bodyRadius + 0.19, bodyRadius + 0.11, 2.3, 36, 1, true, 0, Math.PI * 1.35);
+      const visorMat = new THREE.MeshStandardMaterial({
+        color: 0x121613,
+        roughness: 0.32,
+        roughnessMap: brushedTex,
+        metalness: 0.88,
+        side: THREE.DoubleSide
+      });
+      const visor = new THREE.Mesh(visorGeom, visorMat);
+      visor.rotation.x = Math.PI / 2;
+      visor.rotation.z = -Math.PI * 0.675;
+      visor.position.set(0, 0.14, bodyLength / 2 + 0.2);
+      visor.castShadow = true;
+      cameraHead.add(visor);
+
+      // Laser-Engraved Specs Decal on Sun Visor
+      const decalMat = new THREE.MeshBasicMaterial({
+        map: markingsTex,
+        transparent: true,
+        opacity: 0.85,
+        side: THREE.DoubleSide
+      });
+      const decalMesh = new THREE.Mesh(new THREE.PlaneGeometry(1.8, 0.45), decalMat);
+      decalMesh.position.set(0, bodyRadius + 0.28, bodyLength / 2 + 0.3);
+      decalMesh.rotation.x = -Math.PI / 10;
+      cameraHead.add(decalMesh);
+
+      // Front Face Bezel Plate
+      const frontBezel = new THREE.Mesh(new THREE.CylinderGeometry(bodyRadius - 0.05, bodyRadius - 0.05, 0.25, 36), machinedAlumMat);
+      frontBezel.rotation.x = Math.PI / 2;
+      frontBezel.position.set(0, 0, bodyLength / 2);
+      cameraHead.add(frontBezel);
+
+      // Stepped Lens Barrel with Dual Knurled Rings
+      const lensBarrel = new THREE.Mesh(new THREE.CylinderGeometry(0.70, 0.80, 0.6, 32), machinedAlumMat);
+      lensBarrel.rotation.x = Math.PI / 2;
+      lensBarrel.position.set(0, 0, bodyLength / 2 + 0.24);
+      cameraHead.add(lensBarrel);
+
+      // Knurled Zoom & Focus Grip Rings around barrel
+      const knurlRing1 = new THREE.Mesh(new THREE.CylinderGeometry(0.82, 0.82, 0.12, 48), anodizedForestMat);
+      knurlRing1.rotation.x = Math.PI / 2;
+      knurlRing1.position.set(0, 0, bodyLength / 2 + 0.15);
+      cameraHead.add(knurlRing1);
+
+      const knurlRing2 = new THREE.Mesh(new THREE.CylinderGeometry(0.76, 0.76, 0.10, 48), anodizedCoralMat);
+      knurlRing2.rotation.x = Math.PI / 2;
+      knurlRing2.position.set(0, 0, bodyLength / 2 + 0.32);
+      cameraHead.add(knurlRing2);
+
+      // Precision Convex Optical Glass Front Lens Element
+      const glassElement = new THREE.Mesh(
+        new THREE.SphereGeometry(0.65, 32, 16, 0, Math.PI * 2, 0, Math.PI / 2),
+        opticalGlassMat
+      );
+      glassElement.position.set(0, 0, bodyLength / 2 + 0.42);
+      cameraHead.add(glassElement);
+
+      // Anti-Reflective Optical Coating Ring (Emerald/Violet Glint)
+      const arRing = new THREE.Mesh(
+        new THREE.RingGeometry(0.36, 0.64, 32),
+        new THREE.MeshStandardMaterial({
+          color: 0x0a2218,
+          emissive: 0x18442a,
+          emissiveIntensity: 0.5,
+          roughness: 0.08,
+          side: THREE.DoubleSide
+        })
+      );
+      arRing.position.set(0, 0, bodyLength / 2 + 0.36);
+      cameraHead.add(arRing);
+
+      // Deep Sensor Iris Diaphragm Core
+      const iris = new THREE.Mesh(new THREE.CircleGeometry(0.35, 24), sensorCoreMat);
+      iris.position.set(0, 0, bodyLength / 2 + 0.30);
+      cameraHead.add(iris);
+
+      // Ring of 12 Infrared Night-Vision LEDs
+      const irCount = 12;
+      const irRingRadius = 0.94;
+      for (let i = 0; i < irCount; i++) {
+        const theta = (i / irCount) * Math.PI * 2;
+        const irSocket = new THREE.Mesh(new THREE.CylinderGeometry(0.09, 0.09, 0.12, 16), machinedAlumMat);
+        irSocket.rotation.x = Math.PI / 2;
+        irSocket.position.set(Math.cos(theta) * irRingRadius, Math.sin(theta) * irRingRadius, bodyLength / 2 + 0.12);
+        cameraHead.add(irSocket);
+
+        const irDiode = new THREE.Mesh(new THREE.SphereGeometry(0.07, 12, 12), irLedMat);
+        irDiode.position.set(Math.cos(theta) * irRingRadius, Math.sin(theta) * irRingRadius, bodyLength / 2 + 0.16);
+        cameraHead.add(irDiode);
+      }
+
+      // Active Recording Tally Lamp
+      const tallyLamp = new THREE.Mesh(new THREE.CylinderGeometry(0.075, 0.075, 0.14, 16), tallyLightMat);
+      tallyLamp.rotation.x = Math.PI / 2;
+      tallyLamp.position.set(0, 0.96, bodyLength / 2 + 0.14);
+      cameraHead.add(tallyLamp);
+
+      // 7. Volumetric Inspection Laser Cone & Holographic Targeting Reticle
+      const laserLength = 18.0;
+      const laserBaseRadius = 2.6;
+      const laserConeGeom = new THREE.ConeGeometry(laserBaseRadius, laserLength, 36, 1, true);
+      laserConeGeom.translate(0, -laserLength / 2, 0);
+      laserConeGeom.rotateX(-Math.PI / 2);
+
+      const laserShaderMat = new THREE.ShaderMaterial({
+        uniforms: {
+          uColor: { value: new THREE.Color(0x91AE6E) },
+          uOpacity: { value: 0.18 },
+          uTime: { value: 0 }
+        },
+        vertexShader: `
+          varying vec3 vNormal;
+          varying vec3 vPosition;
+          void main() {
+            vNormal = normalize(normalMatrix * normal);
+            vPosition = position;
+            gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
+          }
+        `,
+        fragmentShader: `
+          uniform vec3 uColor;
+          uniform float uOpacity;
+          uniform float uTime;
+          varying vec3 vNormal;
+          varying vec3 vPosition;
+          void main() {
+            float edgeGlow = pow(0.75 - abs(dot(vNormal, vec3(0.0, 0.0, 1.0))), 2.2);
+            float distFade = clamp(vPosition.z / 18.0, 0.0, 1.0);
+            float scanWave = sin(vPosition.z * 1.6 - uTime * 6.0) * 0.25 + 0.75;
+            float finalAlpha = edgeGlow * uOpacity * (1.0 - distFade * 0.7) * scanWave;
+            gl_FragColor = vec4(uColor, finalAlpha);
+          }
+        `,
+        transparent: true,
+        blending: THREE.AdditiveBlending,
+        side: THREE.DoubleSide,
+        depthWrite: false
+      });
+
+      const laserCone = new THREE.Mesh(laserConeGeom, laserShaderMat);
+      laserCone.position.set(0, 0, bodyLength / 2 + 0.45);
+      cameraHead.add(laserCone);
+
+      // High-Tech Holographic Reticle Group (Positioned at inspection target zone)
+      const reticleGroup = new THREE.Group();
+      reticleGroup.position.set(0, 0, 12.0);
+      cameraHead.add(reticleGroup);
+
+      // Fine Segmented Aiming Ring
+      const reticleRing = new THREE.Mesh(
+        new THREE.RingGeometry(0.68, 0.71, 48),
+        new THREE.MeshBasicMaterial({ color: 0x91AE6E, transparent: true, opacity: 0.65, side: THREE.DoubleSide })
+      );
+      reticleGroup.add(reticleRing);
+
+      // Concentric Micro-Ring
+      const reticleInner = new THREE.Mesh(
+        new THREE.RingGeometry(0.24, 0.26, 32),
+        new THREE.MeshBasicMaterial({ color: 0x91AE6E, transparent: true, opacity: 0.45, side: THREE.DoubleSide })
+      );
+      reticleGroup.add(reticleInner);
+
+      // 4 Precision Target Brackets [ ]
+      const bracketGroup = new THREE.Group();
+      for (let i = 0; i < 4; i++) {
+        const bracketAngle = (i / 4) * Math.PI * 2 + Math.PI / 4;
+        const tick = new THREE.Mesh(
+          new THREE.PlaneGeometry(0.22, 0.025),
+          new THREE.MeshBasicMaterial({ color: 0xD96868, side: THREE.DoubleSide })
+        );
+        tick.rotation.z = bracketAngle;
+        tick.position.set(Math.cos(bracketAngle) * 0.86, Math.sin(bracketAngle) * 0.86, 0);
+        bracketGroup.add(tick);
+      }
+      reticleGroup.add(bracketGroup);
+
+      // Central Lock Dot
+      const centerDot = new THREE.Mesh(
+        new THREE.CircleGeometry(0.04, 16),
+        new THREE.MeshBasicMaterial({ color: 0xD96868, side: THREE.DoubleSide })
+      );
+      reticleGroup.add(centerDot);
+
+      // 8. Studio PBR Lighting Setup with Soft Shadows
+      const ambLight = new THREE.AmbientLight(0x283228, 1.4);
+      scene.add(ambLight);
+
+      // Key light highlighting top metallic visor & arm
+      const keyLight = new THREE.DirectionalLight(0xffffff, 2.5);
+      keyLight.position.set(6, 12, 14);
+      keyLight.castShadow = true;
+      keyLight.shadow.mapSize.width = 1024;
+      keyLight.shadow.mapSize.height = 1024;
+      keyLight.shadow.bias = -0.001;
+      scene.add(keyLight);
+
+      // Sage green bounce fill light
+      const fillLight = new THREE.DirectionalLight(0x91AE6E, 1.4);
+      fillLight.position.set(-8, -4, 6);
+      scene.add(fillLight);
+
+      // Cinematic Coral Rim Light from behind
+      const rimLight = new THREE.DirectionalLight(0xD96868, 2.2);
+      rimLight.position.set(3, -6, -8);
+      scene.add(rimLight);
+
+      // Internal Lens Point Glow
+      const lensPointLight = new THREE.PointLight(0xD96868, 1.2, 5);
+      lensPointLight.position.set(0, 0, bodyLength / 2 + 0.6);
+      cameraHead.add(lensPointLight);
+
+      // 9. Natural 3/4 Resting Angles & Smooth Interaction
+      const baseRestingYaw = -0.38;   // ~22 degrees left towards login card
+      const baseRestingPitch = -0.16; // ~9 degrees down overlooking area
+
+      const mouse = {
+        x: 0,
+        y: 0,
+        targetX: 0,
+        targetY: 0,
+        isOverInput: false,
+        lastActivity: Date.now()
+      };
+
+      // Cursor tracking across entire window (including left login panel)
+      window.addEventListener('mousemove', (e) => {
+        mouse.targetX = (e.clientX / window.innerWidth) * 2 - 1;
+        mouse.targetY = -(e.clientY / window.innerHeight) * 2 + 1;
+        mouse.lastActivity = Date.now();
+      });
+
+      // Interactive Auth Inspection Triggers
+      const sensitiveInputs = document.querySelectorAll('#email, #password, #demoAutoFillBtn, .btn-primary, .form-control');
+      sensitiveInputs.forEach(el => {
+        el.addEventListener('mouseenter', () => { mouse.isOverInput = true; });
+        el.addEventListener('focus', () => { mouse.isOverInput = true; });
+        el.addEventListener('mouseleave', () => { mouse.isOverInput = false; });
+        el.addEventListener('blur', () => { mouse.isOverInput = false; });
+      });
+
+      function onResize() {
+        if (!container) return;
+        const w = container.clientWidth;
+        const h = container.clientHeight;
+        camera.aspect = w / h;
+        camera.updateProjectionMatrix();
+        renderer.setSize(w, h);
+      }
+      window.addEventListener('resize', onResize);
+
+      // 10. Main Render & Inspection Choreography
+      let clock = new THREE.Clock();
+      let mode = 'search'; // 'search' (Sage #91AE6E) or 'lock' (Coral #D96868)
+      let currentYaw = baseRestingYaw;
+      let currentPitch = baseRestingPitch;
+
+      function render() {
+        requestAnimationFrame(render);
+        const time = clock.getElapsedTime();
+        laserShaderMat.uniforms.uTime.value = time;
+
+        const idle = (Date.now() - mouse.lastActivity) > 2200;
+
+        let targetYaw = baseRestingYaw;
+        let targetPitch = baseRestingPitch;
+
+        if (mouse.isOverInput) {
+          // Direct Precision Inspection Lock onto Login Credentials
+          targetYaw = -0.74; // Focus firmly towards login card
+          targetPitch = -0.12;
+
+          if (mode !== 'lock') {
+            mode = 'lock';
+            laserShaderMat.uniforms.uColor.value.setHex(0xD96868);
+            reticleRing.material.color.setHex(0xD96868);
+            reticleInner.material.color.setHex(0xD96868);
+            tallyLightMat.color.setHex(0xD96868);
+            lensPointLight.color.setHex(0xD96868);
+          }
+        } else if (idle) {
+          // Autonomous Surveillance Perimeter Sweep
+          targetYaw = baseRestingYaw + Math.sin(time * 0.45) * 0.35;
+          targetPitch = baseRestingPitch + Math.cos(time * 0.32) * 0.12;
+
+          // Gentle tactical mode toggle every 5 seconds
+          const phase = Math.floor(time / 5) % 2;
+          if (phase === 1 && mode !== 'lock') {
+            mode = 'lock';
+            laserShaderMat.uniforms.uColor.value.setHex(0xD96868);
+            reticleRing.material.color.setHex(0xD96868);
+            reticleInner.material.color.setHex(0xD96868);
+            tallyLightMat.color.setHex(0xD96868);
+            lensPointLight.color.setHex(0xD96868);
+          } else if (phase === 0 && mode !== 'search') {
+            mode = 'search';
+            laserShaderMat.uniforms.uColor.value.setHex(0x91AE6E);
+            reticleRing.material.color.setHex(0x91AE6E);
+            reticleInner.material.color.setHex(0x91AE6E);
+            tallyLightMat.color.setHex(0x689D4B);
+            lensPointLight.color.setHex(0x689D4B);
+          }
+        } else {
+          // User Cursor Tracking with Natural Physical Dampening
+          mouse.x += (mouse.targetX - mouse.x) * 0.06;
+          mouse.y += (mouse.targetY - mouse.y) * 0.06;
+
+          // Maps mouse across entire screen to subtle realistic gimbal pan/tilt
+          targetYaw = baseRestingYaw + mouse.x * 0.45;
+          targetPitch = baseRestingPitch - mouse.y * 0.28;
+
+          if (mode !== 'search') {
+            mode = 'search';
+            laserShaderMat.uniforms.uColor.value.setHex(0x91AE6E);
+            reticleRing.material.color.setHex(0x91AE6E);
+            reticleInner.material.color.setHex(0x91AE6E);
+            tallyLightMat.color.setHex(0x689D4B);
+            lensPointLight.color.setHex(0x689D4B);
+          }
+        }
+
+        // Mechanical Servomotor Inertia Interpolation (Smooth Damping)
+        currentYaw += (targetYaw - currentYaw) * 0.055;
+        currentPitch += (targetPitch - currentPitch) * 0.055;
+
+        gimbalYaw.rotation.y = currentYaw;
+        gimbalPitch.rotation.x = currentPitch;
+
+        // Subtle mechanical micro-vibration
+        cameraBody.position.y = Math.sin(time * 6) * 0.008;
+
+        // Tactical Reticle Rotation & Pulse
+        bracketGroup.rotation.z += (mode === 'lock' ? 0.028 : 0.012);
+        const pulse = 1.0 + Math.sin(time * (mode === 'lock' ? 6.5 : 3.5)) * 0.06;
+        reticleGroup.scale.set(pulse, pulse, 1);
+
+        // Infrared LEDs Pulsing
+        irLedMat.emissiveIntensity = 2.0 + Math.sin(time * 5.0) * 0.6;
+
+        // Recording Tally Blinking
+        if (mode === 'lock') {
+          tallyLamp.visible = Math.sin(time * 12.0) > 0.0;
+        } else {
+          tallyLamp.visible = Math.sin(time * 4.0) > -0.4;
+        }
+
+        renderer.render(scene, camera);
+      }
+
+      render();
+    })();
   </script>
 </body>
 

@@ -1,181 +1,370 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Vigilant Eye — AI Theft Detection</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700;900&display=swap" rel="stylesheet">
-<style>
-  *{margin:0;padding:0;box-sizing:border-box;}
-  body{
-    font-family:'Outfit',sans-serif;
-    background:#03080e;
-    color:#E3FDFD;
-    height:100vh;
-    display:flex;
-    flex-direction:column;
-    align-items:center;
-    justify-content:center;
-    overflow:hidden;
-    position:relative;
-  }
-  /* Animated background grid */
-  .grid-bg{
-    position:fixed;inset:0;
-    background-image:
-      linear-gradient(rgba(113,201,206,0.04) 1px, transparent 1px),
-      linear-gradient(90deg, rgba(113,201,206,0.04) 1px, transparent 1px);
-    background-size:50px 50px;
-    animation:gridMove 20s linear infinite;
-    pointer-events:none;
-  }
-  @keyframes gridMove{
-    0%{background-position:0 0;}
-    100%{background-position:50px 50px;}
-  }
-  /* Radial glow */
-  .glow{
-    position:fixed;
-    width:650px;height:650px;
-    border-radius:50%;
-    background:radial-gradient(circle, rgba(113,201,206,0.16) 0%, rgba(166,227,233,0.06) 45%, transparent 70%);
-    top:50%;left:50%;
-    transform:translate(-50%,-50%);
-    animation:pulse 3s ease-in-out infinite;
-    pointer-events:none;
-  }
-  @keyframes pulse{
-    0%,100%{transform:translate(-50%,-50%) scale(1);}
-    50%{transform:translate(-50%,-50%) scale(1.2);}
-  }
-  /* Logo container */
-  .logo-wrap{
-    position:relative;z-index:10;
-    display:flex;flex-direction:column;
-    align-items:center;gap:20px;
-    animation:fadeUp 1s ease forwards;
-  }
-  @keyframes fadeUp{
-    from{opacity:0;transform:translateY(30px);}
-    to{opacity:1;transform:translateY(0);}
-  }
-  /* Eye icon */
-  .eye-icon{
-    width:110px;height:110px;
-    background:linear-gradient(135deg,#71C9CE,#4ea8ae);
-    color:#03080e;
-    border-radius:50%;
-    display:flex;align-items:center;justify-content:center;
-    font-size:52px;
-    box-shadow:0 0 45px rgba(113,201,206,0.65), 0 0 90px rgba(166,227,233,0.25);
-    animation:eyePulse 2s ease-in-out infinite;
-  }
-  @keyframes eyePulse{
-    0%,100%{box-shadow:0 0 45px rgba(113,201,206,0.65),0 0 90px rgba(166,227,233,0.25);}
-    50%{box-shadow:0 0 70px rgba(166,227,233,0.9),0 0 130px rgba(113,201,206,0.45);}
-  }
-  .brand-name{
-    font-size:3rem;font-weight:900;
-    background:linear-gradient(90deg,#E3FDFD,#A6E3E9,#71C9CE,#E3FDFD);
-    background-size:200%;
-    -webkit-background-clip:text;-webkit-text-fill-color:transparent;
-    animation:shimmer 3s linear infinite;
-    letter-spacing:4px;
-  }
-  @keyframes shimmer{
-    0%{background-position:0%;}100%{background-position:200%;}
-  }
-  .tagline{font-size:0.95rem;color:rgba(203,241,245,0.6);letter-spacing:3px;text-transform:uppercase;}
-  /* Loading bar */
-  .loading-wrap{
-    margin-top:50px;
-    display:flex;flex-direction:column;align-items:center;gap:12px;
-  }
-  .loading-bar{
-    width:280px;height:3px;
-    background:rgba(255,255,255,0.08);
-    border-radius:2px;overflow:hidden;
-  }
-  .loading-fill{
-    height:100%;width:0%;
-    background:linear-gradient(90deg,#71C9CE,#A6E3E9);
-    border-radius:2px;
-    box-shadow:0 0 10px rgba(113,201,206,0.8);
-    animation:load 2.8s cubic-bezier(0.4,0,0.2,1) forwards;
-  }
-  @keyframes load{
-    0%{width:0%;}70%{width:80%;}90%{width:95%;}100%{width:100%;}
-  }
-  .loading-text{font-size:0.78rem;color:rgba(203,241,245,0.55);letter-spacing:2px;text-transform:uppercase;}
-  /* Scanning line */
-  .scan-line{
-    position:fixed;top:0;left:0;right:0;height:2px;
-    background:linear-gradient(90deg,transparent,#71C9CE,transparent);
-    animation:scanDown 3s linear infinite;
-    pointer-events:none;z-index:20;
-  }
-  @keyframes scanDown{
-    0%{top:-2px;}100%{top:100vh;}
-  }
-  /* Corner decorations */
-  .corner{position:fixed;width:30px;height:30px;pointer-events:none;z-index:10;}
-  .corner.tl{top:20px;left:20px;border-top:2px solid rgba(166,227,233,0.5);border-left:2px solid rgba(166,227,233,0.5);}
-  .corner.tr{top:20px;right:20px;border-top:2px solid rgba(166,227,233,0.5);border-right:2px solid rgba(166,227,233,0.5);}
-  .corner.bl{bottom:20px;left:20px;border-bottom:2px solid rgba(166,227,233,0.5);border-left:2px solid rgba(166,227,233,0.5);}
-  .corner.br{bottom:20px;right:20px;border-bottom:2px solid rgba(166,227,233,0.5);border-right:2px solid rgba(166,227,233,0.5);}
-  /* Status dots */
-  .status-row{display:flex;gap:20px;margin-top:10px;}
-  .dot{width:8px;height:8px;border-radius:50%;animation:blink 1.2s ease-in-out infinite;}
-  .dot:nth-child(1){background:#71C9CE;animation-delay:0s;}
-  .dot:nth-child(2){background:#A6E3E9;animation-delay:0.4s;}
-  .dot:nth-child(3){background:#CBF1F5;animation-delay:0.8s;}
-  @keyframes blink{0%,100%{opacity:0.2;}50%{opacity:1;transform:scale(1.4);}}
-  .version{position:fixed;bottom:25px;font-size:0.7rem;color:rgba(203,241,245,0.3);letter-spacing:1px;}
-</style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Initializing Security Matrix — Vigilant Eye</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700;800;900&family=JetBrains+Mono:wght@400;600;700&display=swap" rel="stylesheet">
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet">
+  <style>
+    *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+    :root {
+      --palette-coral: #D96868;
+      --palette-sage: #91AE6E;
+      --palette-forest: #689D4B;
+      --palette-bg: #181C19;
+      --palette-text: #F2F2F2;
+    }
+
+    body {
+      font-family: 'Outfit', sans-serif;
+      background: #121513;
+      color: #F2F2F2;
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+      position: relative;
+    }
+
+    /* Ambient cyber grid */
+    .grid-bg {
+      position: fixed; inset: 0;
+      background-image:
+        linear-gradient(rgba(145, 174, 110, 0.08) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(145, 174, 110, 0.08) 1px, transparent 1px);
+      background-size: 40px 40px;
+      animation: gridMove 25s linear infinite;
+      pointer-events: none;
+    }
+    @keyframes gridMove {
+      0% { background-position: 0 0; }
+      100% { background-position: 40px 40px; }
+    }
+
+    /* Radial glow backdrop */
+    .ambient-glow {
+      position: fixed;
+      width: 750px; height: 750px;
+      border-radius: 50%;
+      background: radial-gradient(circle, rgba(217, 104, 104, 0.16) 0%, rgba(145, 174, 110, 0.08) 40%, transparent 70%);
+      top: 50%; left: 50%;
+      transform: translate(-50%, -50%);
+      pointer-events: none;
+      animation: glowBreathing 4s ease-in-out infinite alternate;
+    }
+    @keyframes glowBreathing {
+      0% { transform: translate(-50%, -50%) scale(0.92); opacity: 0.7; }
+      100% { transform: translate(-50%, -50%) scale(1.15); opacity: 1; }
+    }
+
+    /* Laser scan line */
+    .laser-scan {
+      position: fixed; top: 0; left: 0; right: 0; height: 2px;
+      background: linear-gradient(90deg, transparent 0%, #D96868 30%, #91AE6E 70%, transparent 100%);
+      box-shadow: 0 0 15px #D96868;
+      animation: scanDown 3s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+      pointer-events: none; z-index: 30;
+    }
+    @keyframes scanDown {
+      0% { top: -4px; opacity: 0.9; }
+      100% { top: 100vh; opacity: 0.15; }
+    }
+
+    /* Corner HUD brackets */
+    .corner-bracket {
+      position: fixed; width: 36px; height: 36px; pointer-events: none; z-index: 20;
+    }
+    .corner-bracket.tl { top: 24px; left: 24px; border-top: 2px solid #91AE6E; border-left: 2px solid #91AE6E; }
+    .corner-bracket.tr { top: 24px; right: 24px; border-top: 2px solid #91AE6E; border-right: 2px solid #91AE6E; }
+    .corner-bracket.bl { bottom: 24px; left: 24px; border-bottom: 2px solid #91AE6E; border-left: 2px solid #91AE6E; }
+    .corner-bracket.br { bottom: 24px; right: 24px; border-bottom: 2px solid #91AE6E; border-right: 2px solid #91AE6E; }
+
+    /* Corner telemetry labels */
+    .corner-tag {
+      position: fixed; font-family: 'JetBrains Mono', monospace; font-size: 0.68rem;
+      color: rgba(145, 174, 110, 0.7); letter-spacing: 1.2px; text-transform: uppercase; z-index: 20;
+    }
+    .corner-tag.tl { top: 28px; left: 68px; }
+    .corner-tag.tr { top: 28px; right: 68px; text-align: right; }
+    .corner-tag.bl { bottom: 28px; left: 68px; }
+    .corner-tag.br { bottom: 28px; right: 68px; text-align: right; }
+
+    /* Main container */
+    .splash-container {
+      position: relative; z-index: 10;
+      display: flex; flex-direction: column;
+      align-items: center; justify-content: center;
+      width: 100%; max-width: 580px; padding: 20px;
+    }
+
+    /* 3D Iris / Aperture Ring */
+    .iris-wrap {
+      position: relative;
+      width: 150px; height: 150px;
+      margin-bottom: 28px;
+      display: flex; align-items: center; justify-content: center;
+    }
+    .outer-ring {
+      position: absolute; inset: 0;
+      border: 2px dashed rgba(145, 174, 110, 0.45);
+      border-radius: 50%;
+      animation: spinClockwise 12s linear infinite;
+    }
+    .inner-ring {
+      position: absolute; inset: 12px;
+      border: 2px solid rgba(217, 104, 104, 0.5);
+      border-top-color: transparent;
+      border-bottom-color: transparent;
+      border-radius: 50%;
+      animation: spinCounter 6s linear infinite;
+    }
+    .iris-core {
+      width: 84px; height: 84px;
+      background: linear-gradient(135deg, #D96868 0%, #689D4B 100%);
+      border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 38px; color: #FFFFFF;
+      box-shadow: 0 0 40px rgba(217, 104, 104, 0.55), 0 0 80px rgba(104, 157, 75, 0.3);
+      animation: corePulse 2s ease-in-out infinite;
+      position: relative; overflow: hidden;
+    }
+    .core-sweep {
+      position: absolute; left: 0; right: 0; height: 2px;
+      background: linear-gradient(90deg, transparent, #FFFFFF, transparent);
+      animation: coreSweepAnim 1.8s ease-in-out infinite;
+    }
+    @keyframes spinClockwise { to { transform: rotate(360deg); } }
+    @keyframes spinCounter { to { transform: rotate(-360deg); } }
+    @keyframes corePulse {
+      0%, 100% { transform: scale(1); box-shadow: 0 0 35px rgba(217, 104, 104, 0.5); }
+      50% { transform: scale(1.08); box-shadow: 0 0 60px rgba(217, 104, 104, 0.8), 0 0 100px rgba(104, 157, 75, 0.45); }
+    }
+    @keyframes coreSweepAnim {
+      0% { top: 15%; opacity: 0; }
+      50% { opacity: 1; }
+      100% { top: 85%; opacity: 0; }
+    }
+
+    /* Brand Typography */
+    .brand-title {
+      font-size: 2.6rem;
+      font-weight: 900;
+      letter-spacing: 5px;
+      text-transform: uppercase;
+      background: linear-gradient(135deg, #F2F2F2 0%, #D96868 60%, #91AE6E 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      margin-bottom: 6px;
+      text-shadow: 0 4px 30px rgba(217, 104, 104, 0.35);
+    }
+    .brand-tagline {
+      font-size: 0.86rem;
+      font-weight: 700;
+      color: rgba(242, 242, 242, 0.7);
+      letter-spacing: 3px;
+      text-transform: uppercase;
+      margin-bottom: 32px;
+    }
+
+    /* Glass Progress Console */
+    .console-card {
+      width: 100%;
+      background: rgba(24, 28, 25, 0.75);
+      border: 1px solid rgba(145, 174, 110, 0.35);
+      backdrop-filter: blur(20px) saturate(180%);
+      -webkit-backdrop-filter: blur(20px) saturate(180%);
+      border-radius: 16px;
+      padding: 22px 26px;
+      box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5), inset 0 1px 0 rgba(255, 255, 255, 0.1);
+    }
+
+    .console-status-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 12px;
+      font-family: 'JetBrains Mono', monospace;
+    }
+    .console-status-msg {
+      font-size: 0.84rem;
+      color: #F2F2F2;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .console-status-msg i {
+      color: #91AE6E;
+    }
+    .console-pct {
+      font-size: 1.05rem;
+      font-weight: 800;
+      color: #D96868;
+      font-variant-numeric: tabular-nums;
+    }
+
+    /* Progress bar */
+    .progress-track {
+      width: 100%;
+      height: 6px;
+      background: rgba(255, 255, 255, 0.08);
+      border-radius: 4px;
+      overflow: hidden;
+      position: relative;
+    }
+    .progress-bar {
+      height: 100%;
+      width: 0%;
+      background: linear-gradient(90deg, #D96868 0%, #91AE6E 50%, #689D4B 100%);
+      border-radius: 4px;
+      box-shadow: 0 0 16px rgba(217, 104, 104, 0.8);
+      transition: width 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    .telemetry-pills {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-top: 16px;
+      padding-top: 14px;
+      border-top: 1px solid rgba(145, 174, 110, 0.15);
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.72rem;
+      color: rgba(242, 242, 242, 0.6);
+    }
+    .telemetry-pill {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .pulse-dot {
+      width: 6px; height: 6px; border-radius: 50%;
+      background: #689D4B;
+      box-shadow: 0 0 8px #689D4B;
+      animation: pulseGlow 1.5s infinite;
+    }
+    @keyframes pulseGlow {
+      0%, 100% { opacity: 1; transform: scale(1); }
+      50% { opacity: 0.4; transform: scale(1.3); }
+    }
+
+    /* Fade-out Overlay */
+    .fade-overlay {
+      position: fixed; inset: 0;
+      background: #121513;
+      opacity: 0; pointer-events: none;
+      transition: opacity 0.5s ease;
+      z-index: 100;
+    }
+    .fade-overlay.active { opacity: 1; }
+  </style>
 </head>
 <body>
-<div class="grid-bg"></div>
-<div class="glow"></div>
-<div class="scan-line"></div>
-<div class="corner tl"></div><div class="corner tr"></div>
-<div class="corner bl"></div><div class="corner br"></div>
+  <div class="grid-bg"></div>
+  <div class="ambient-glow"></div>
+  <div class="laser-scan"></div>
 
-<div class="logo-wrap">
-  <div class="eye-icon">👁</div>
-  <div>
-    <div class="brand-name">VIGILANT EYE</div>
-    <div class="tagline">AI-Powered Theft Detection System</div>
-  </div>
-  <div class="loading-wrap">
-    <div class="loading-bar"><div class="loading-fill" id="fill"></div></div>
-    <div class="loading-text" id="loadMsg">Initializing systems...</div>
-    <div class="status-row">
-      <div class="dot"></div><div class="dot"></div><div class="dot"></div>
+  <!-- Corner HUD brackets & tags -->
+  <div class="corner-bracket tl"></div>
+  <div class="corner-tag tl">SYS.MATRIX: ONLINE // LAT 34.0522° N</div>
+  
+  <div class="corner-bracket tr"></div>
+  <div class="corner-tag tr">CORE: YOLOv8-X // AES-256</div>
+
+  <div class="corner-bracket bl"></div>
+  <div class="corner-tag bl">SENTINEL PROTOCOL: SECURE</div>
+
+  <div class="corner-bracket br"></div>
+  <div class="corner-tag br">BUILD: v2.4.0-PRO</div>
+
+  <div class="fade-overlay" id="fadeOverlay"></div>
+
+  <div class="splash-container">
+    <!-- Iris Aperture -->
+    <div class="iris-wrap">
+      <div class="outer-ring"></div>
+      <div class="inner-ring"></div>
+      <div class="iris-core">
+        👁
+        <div class="core-sweep"></div>
+      </div>
+    </div>
+
+    <!-- Title -->
+    <h1 class="brand-title">Vigilant Eye</h1>
+    <p class="brand-tagline">AI Surveillance &amp; Shoplifting Prevention</p>
+
+    <!-- Glass Console -->
+    <div class="console-card">
+      <div class="console-status-row">
+        <div class="console-status-msg">
+          <i class="fas fa-terminal"></i>
+          <span id="statusMsg">Initializing AI Engine...</span>
+        </div>
+        <div class="console-pct" id="pctCounter">0%</div>
+      </div>
+
+      <div class="progress-track">
+        <div class="progress-bar" id="progressBar"></div>
+      </div>
+
+      <div class="telemetry-pills">
+        <div class="telemetry-pill">
+          <span class="pulse-dot"></span>
+          <span>GPU ACCEL: ACTIVE</span>
+        </div>
+        <div class="telemetry-pill">
+          <i class="fas fa-shield-alt" style="color:var(--palette-coral);"></i>
+          <span>SURVEILLANCE ARMED</span>
+        </div>
+        <div class="telemetry-pill">
+          <i class="fas fa-wifi" style="color:var(--palette-forest);"></i>
+          <span>RTSP: READY</span>
+        </div>
+      </div>
     </div>
   </div>
-</div>
-<div class="version">v2.0.0 &nbsp;|&nbsp; Vigilant Eye &nbsp;|&nbsp; AI Surveillance</div>
 
-<script>
-  const messages = [
-    "Initializing systems...",
-    "Loading AI model...",
-    "Connecting to cameras...",
-    "Checking alert modules...",
-    "Ready.",
-  ];
-  let i = 0;
-  const msgEl = document.getElementById("loadMsg");
-  const interval = setInterval(() => {
-    if (i < messages.length) { msgEl.textContent = messages[i++]; }
-    else clearInterval(interval);
-  }, 560);
-  // Redirect after splash
-  setTimeout(() => { 
-    sessionStorage.setItem('splash_shown', 'true');
-    window.location.href = "/login"; 
-  }, 3000);
-</script>
+  <script>
+
+    const steps = [
+      { text: "Booting Vigilant Eye Neural Core...", pct: 18 },
+      { text: "Synchronizing Real-time RTSP Feeds...", pct: 42 },
+      { text: "Calibrating YOLOv8-X Detection Weights...", pct: 68 },
+      { text: "Arming Sentinel Shoplifting Matrix...", pct: 88 },
+      { text: "Security Operations Center Ready.", pct: 100 }
+    ];
+    const sessionKey = 'splash_shown';
+    const totalTime = 2900;
+        
+
+    const statusEl = document.getElementById('statusMsg');
+    const pctEl = document.getElementById('pctCounter');
+    const barEl = document.getElementById('progressBar');
+    const overlay = document.getElementById('fadeOverlay');
+
+    const stepDuration = totalTime / steps.length;
+
+    steps.forEach((step, idx) => {
+      setTimeout(() => {
+        statusEl.textContent = step.text;
+        pctEl.textContent = step.pct + '%';
+        barEl.style.width = step.pct + '%';
+      }, idx * stepDuration);
+    });
+
+    setTimeout(() => {
+      overlay.classList.add('active');
+      sessionStorage.setItem(sessionKey, 'true');
+      setTimeout(() => {
+        window.location.href = "/login";
+      }, 450);
+    }, totalTime + 150);
+  </script>
 </body>
 </html>
